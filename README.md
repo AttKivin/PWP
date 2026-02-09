@@ -7,7 +7,13 @@
 * Student 4. Hatem ElKharashy, hatem.elkharashy@student.oulu.fi
 
 ## Database 
-
+### Requirements
+All the dependencies are included in the "requirements.txt" file. A simple working environment for this task is
+```bash
+python3 -m venv <venv_name>
+source <venv_name>/bin/activate
+pip install -r requirements.txt
+```
 ### Create tables 
 
 `flask --app habithub init-db`
