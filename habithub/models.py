@@ -1,3 +1,5 @@
+import click
+from flask.cli import with_appcontext
 from habithub import db
 from datetime import datetime
 
@@ -43,3 +45,21 @@ class Tracking(db.Model):
     log_time = db.Column(db.DateTime, nullable=False) 
     # Relationship back to Habit 
     habit = db.relationship("Habit", back_populates="tracking_logs")
+
+@click.command("init-db")
+@with_appcontext
+def init_db_command():
+    db.create_all()
+    print("Database create successfully")
+
+@click.command("seed")
+@with_appcontext
+def seed_db_command():
+    from scripts.seed_db import seed
+    seed()
+
+@click.command("check")
+@with_appcontext
+def check_db_command():
+    from scripts.check_db import check
+    check()

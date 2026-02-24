@@ -14,24 +14,10 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
 
-    from .models import User, Habit, Reminder, Tracking
-
-    @app.cli.command("init-db")
-    def init_db_command():
-        with app.app_context():
-            db.create_all()
-        print("Database create successfully")
-
-    @app.cli.command("seed")
-    def seed_command():
-        from scripts.seed_db import seed
-        seed()
-
-    @app.cli.command("check")
-    def check_command():
-        from scripts.check_db import check
-        check()
-
+    from . import models
+    app.cli.add_command(models.init_db_command)
+    app.cli.add_command(models.seed_db_command)
+    app.cli.add_command(models.check_db_command)
     return app
 
 @event.listens_for(Engine, "connect")
