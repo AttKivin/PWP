@@ -115,6 +115,7 @@ class Reminder(db.Model):
             raise ValueError("reminded_time must be in HH:MM format") from exc
 
         self.creation_date = datetime.now(UTC)
+        return self
 
 class Tracking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -147,7 +148,8 @@ class Tracking(db.Model):
             self.log_time = datetime.fromisoformat(value)
         except Exception as exc:
             raise ValueError("log_time must be ISO date-time (e.g. 2026-03-01T12:30:00Z)") from exc
-
+        return self
+    
 @click.command("init-db")
 @with_appcontext
 def init_db_command():
