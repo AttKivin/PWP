@@ -19,10 +19,10 @@ api.add_resource(UserCollection, "/users/")
 api.add_resource(UserItem, "/users/<user:user>/")
 
 api.add_resource(HabitCollection, "/users/<user:user>/habits/")
-api.add_resource(HabitItem, "/users/<user:user>/habits/<int:habit_id>/")
+api.add_resource(HabitItem, "/users/<user:user>/habits/<habit:habit>/")
 
-api.add_resource(ReminderCollection, "/users/<user:user>/habits/<int:habit_id>/reminders/")
-api.add_resource(TrackingCollection, "/users/<user:user>/habits/<int:habit_id>/tracking/")
+api.add_resource(ReminderCollection, "/users/<user:user>/habits/<habit:habit>/reminders/")
+api.add_resource(ReminderItem, "/users/<user:user>/habits/<habit:habit>/reminders/<reminder:reminder>/")
 
-api.add_resource(ReminderItem, "/users/<user:user>/habits/<int:habit_id>/reminders/<int:reminder_id>/")
-api.add_resource(TrackingItem, "/users/<user:user>/habits/<int:habit_id>/trackings/<int:tracking_id>/")
+api.add_resource(TrackingCollection, "/users/<user:user>/habits/<habit:habit>/tracking/")
+api.add_resource(TrackingItem, "/users/<user:user>/habits/<habit:habit>/tracking/<tracking:tracking>/")

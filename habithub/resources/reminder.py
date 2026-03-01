@@ -1,79 +1,19 @@
-from flask import Response, request
-from flask_restful import Resource, Api
+from flask import Response, request, url_for
+from flask_restful import Resource
 from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import BadRequest, Conflict, NotFound, UnsupportedMediaType
+from werkzeug.exceptions import BadRequest, Conflict, UnsupportedMediaType
 
-from habithub import db  #, cache
-from habithub.models import Reminder, Habit
-
+from habithub import db
+from habithub.models import Reminder
 
 
 class ReminderItem(Resource):
+    """Resource for managing a single reminder."""
+    def get(self, user, habit, reminder):
+        return reminder.serialize()
 
-    def get(self, user, habit_id, reminder_id):
-        reminder = Reminder.query.join(Habit).filter(
-            Reminder.id == reminder_id,
-            Reminder.habit_id == habit_id,
-            Habit.user_id == user.id
-        ).first()
-
-        if not reminder:
-            raise NotFound(description="Reminder not found")
-
-        return reminder.serialize(), 200
-
-    def put(self, user, habit_id, reminder_id):
-        reminder = Reminder.query.join(Habit).filter(
-            Reminder.id == reminder_id,
-            Reminder.habit_id == habit_id,
-            Habit.user_id == user.id
-        ).first()
-
-        if not reminder:
-            raise NotFound(description="Reminder not found")
-
-        reminder.deserialize(request.json)
-        db.session.commit()
-
-        return reminder.serialize(), 200
-
-    def delete(self, user, habit_id, reminder_id):
-        reminder = Reminder.query.join(Habit).filter(
-            Reminder.id == reminder_id,
-            Reminder.habit_id == habit_id,
-            Habit.user_id == user.id
-        ).first()
-
-        if not reminder:
-            raise NotFound(description="Reminder not found")
-
-        db.session.delete(reminder)
-        db.session.commit()
-
-        return "", 204
-
-
-class ReminderCollection(Resource):
-
-    def get(self, user, habit_id):
-        habit = Habit.query.filter_by(
-            id=habit_id,
-            user_id=user.id
-        ).first()
-
-        if not habit:
-            raise NotFound(description="Habit not found")
-
-        reminders = Reminder.query.filter_by(
-            habit_id=habit.id
-        ).all()
-
-        return {
-            "reminders": [r.serialize() for r in reminders]
-        }, 200
-
-    def post(self, user, habit_id):
+    def put(self, user, habit, reminder):
         if not request.json:
             raise UnsupportedMediaType
         try:
@@ -81,13 +21,34 @@ class ReminderCollection(Resource):
         except ValidationError as e:
             raise BadRequest(description=str(e))
 
-        habit = Habit.query.filter_by(
-            id=habit_id,
-            user_id=user.id
-        ).first()
+        reminder.deserialize(request.json)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            raise Conflict(description="Reminder could not be updated")
 
-        if not habit:
-            raise NotFound(description="Habit not found")
+        return Response(status=204)
+
+    def delete(self, user, habit, reminder):
+        db.session.delete(reminder)
+        db.session.commit()
+        return Response(status=204)
+
+
+class ReminderCollection(Resource):
+    """Resource for managing the collection of reminders for a habit."""
+    def get(self, user, habit):
+        reminders = Reminder.query.filter_by(habit_id=habit.id).all()
+        return [r.serialize() for r in reminders]
+
+    def post(self, user, habit):
+        if not request.json:
+            raise UnsupportedMediaType
+        try:
+            validate(request.json, Reminder.json_schema())
+        except ValidationError as e:
+            raise BadRequest(description=str(e))
 
         reminder = Reminder(habit_id=habit.id)
         reminder.deserialize(request.json)
@@ -99,11 +60,11 @@ class ReminderCollection(Resource):
             db.session.rollback()
             raise Conflict(description="Reminder could not be created")
 
-        location = api.url_for(
-            ReminderItem,
+        location = url_for(
+            "api.reminderitem",
             user=user,
-            habit_id=habit.id,
-            reminder_id=reminder.id
+            habit=habit,
+            reminder=reminder
         )
 
         return Response(status=201, headers={"Location": location})

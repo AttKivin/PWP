@@ -3,8 +3,6 @@ from flask import request
 from werkzeug.exceptions import Forbidden, NotFound
 from .models import User, Habit, Reminder, Tracking
 
-from .models import User, Habit
-
 class UserConverter(BaseConverter):
     def to_python(self, user_id):
         user = User.query.get(user_id)
@@ -25,6 +23,25 @@ class HabitConverter(BaseConverter):
 
     def to_url(self, habit):
         return str(habit.id)
-    
 
 
+class ReminderConverter(BaseConverter):
+    def to_python(self, reminder_id):
+        reminder = Reminder.query.get(reminder_id)
+        if reminder is None:
+            raise NotFound
+        return reminder
+
+    def to_url(self, reminder):
+        return str(reminder.id)
+
+
+class TrackingConverter(BaseConverter):
+    def to_python(self, tracking_id):
+        tracking = Tracking.query.get(tracking_id)
+        if tracking is None:
+            raise NotFound
+        return tracking
+
+    def to_url(self, tracking):
+        return str(tracking.id)

@@ -1,106 +1,68 @@
-from flask import Response, request
-from flask_restful import Resource, Api
+from flask import Response, request, url_for
+from flask_restful import Resource
 from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import BadRequest, Conflict, NotFound, UnsupportedMediaType
+from werkzeug.exceptions import BadRequest, Conflict, UnsupportedMediaType
 
-from habithub import db  #, cache
-from habithub.models import Tracking, Habit
-
+from habithub import db
+from habithub.models import Tracking
 
 
 class TrackingItem(Resource):
+    """Resource for managing a single tracking log."""
+    def get(self, user, habit, tracking):
+        return tracking.serialize()
 
-    def get(self, user, habit_id, tracking_id):
-        tracking = Tracking.query.join(Habit).filter(
-            Tracking.id == tracking_id,
-            Tracking.habit_id == habit_id,
-            Habit.user_id == user.id
-        ).first()
-
-        if not tracking:
-            raise NotFound(description="Tracking entry not found")
-
-        return tracking.serialize(), 200
-
-
-    def delete(self, user, habit_id, tracking_id):
-        tracking = Tracking.query.join(Habit).filter(
-            Tracking.id == tracking_id,
-            Tracking.habit_id == habit_id,
-            Habit.user_id == user.id
-        ).first()
-
-        if not tracking:
-            raise NotFound(description="Tracking entry not found")
-
-        db.session.delete(tracking)
-        db.session.commit()
-
-        return "", 204
-
-
-    def put(self, user, habit_id, tracking_id):
-        tracking = Tracking.query.join(Habit).filter(
-            Tracking.id == tracking_id,
-            Tracking.habit_id == habit_id,
-            Habit.user_id == user.id
-        ).first()
-
-        if not tracking:
-            raise NotFound(description="Tracking entry not found")
-
-        tracking.deserialize(request.json)
-        db.session.commit()
-
-        return tracking.serialize(), 200
-
-
-
-class TrackingCollection(Resource):
-
-    def get(self, user, habit_id):
-        habit = Habit.query.filter_by(
-            id=habit_id,
-            user_id=user.id
-        ).first()
-
-        if not habit:
-            raise NotFound(description="Habit not found")
-
-        trackings = Tracking.query.filter_by(
-            habit_id=habit.id
-        ).all()
-
-        return {
-            "items": [t.serialize() for t in trackings]
-        }, 200
-
-    def post(self, user, habit_id):
-        habit = Habit.query.filter_by(
-            id=habit_id,
-            user_id=user.id
-        ).first()
-
-        if not habit:
-            raise NotFound(description="Habit not found")
-
-        tracking = Tracking(habit_id=habit.id)
-        tracking.deserialize(request.json)
-
+    def put(self, user, habit, tracking):
+        if not request.json:
+            raise UnsupportedMediaType
         try:
-            db.session.add(tracking)
+            validate(request.json, Tracking.json_schema())
+        except ValidationError as e:
+            raise BadRequest(description=str(e))
+
+        tracking.deserialize(request.json)
+        try:
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            raise Conflict(description="Tracking entry could not be created")
+            raise Conflict(description="Tracking log could not be updated")
 
-        location = api.url_for(
-            TrackingItem,
+        return Response(status=204)
+
+    def delete(self, user, habit, tracking):
+        db.session.delete(tracking)
+        db.session.commit()
+        return Response(status=204)
+
+
+class TrackingCollection(Resource):
+    """Resource for managing the collection of tracking logs for a habit."""
+    def get(self, user, habit):
+        logs = Tracking.query.filter_by(habit_id=habit.id).all()
+        return [l.serialize() for l in logs]
+
+    def post(self, user, habit):
+        if not request.json:
+            raise UnsupportedMediaType
+        try:
+            validate(request.json, Tracking.json_schema())
+        except ValidationError as e:
+            raise BadRequest(description=str(e))
+
+        log = Tracking(habit_id=habit.id)
+        log.deserialize(request.json)
+        try:
+            db.session.add(log)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            raise Conflict(description="Tracking log could not be created")
+
+        location = url_for(
+            "api.trackingitem",
             user=user,
-            habit_id=habit.id,
-            tracking_id=tracking.id
+            habit=habit,
+            tracking=log
         )
-
         return Response(status=201, headers={"Location": location})
-
