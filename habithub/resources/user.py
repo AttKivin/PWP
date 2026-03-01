@@ -2,7 +2,7 @@ from flask import Response, request
 from flask_restful import Resource, api
 from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import BadRequest, Conflict, UnsupportedMediaType
+from werkzeug.exceptions import BadRequest, Conflict, NotFound, UnsupportedMediaType
 
 from habithub import db  #, cache
 from habithub.models import User
@@ -28,7 +28,10 @@ class UserCollection(Resource):
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            raise Conflict(description="Email already exists")
+            raise Conflict(description="Email {email} already exists".format(
+                    **request.json
+                )
+            )
 
         location = api.url_for(UserItem, user=user)
         return Response(status=201, headers={"Location": location})
@@ -40,7 +43,31 @@ class UserItem(Resource):
         return user.serialize()
 
     def put(self, user):
-        pass
+        if not request.json:
+            raise UnsupportedMediaType
+
+        try:
+            # To DO:
+            validate(request.json, User.json_schema())
+        except ValidationError as e:
+            raise BadRequest(description=str(e))
+
+        user.deserialize(request.json)
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError:
+            raise Conflict(
+                description="User with email '{email}' already exists.".format(
+                    **request.json
+                )
+            )
+
+        return Response(status=204)
+        
 
     def delete(self, user):
-        pass
+        db.session.delete(user)
+        db.session.commit()
+
+        return Response(status=204)

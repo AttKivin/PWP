@@ -15,14 +15,13 @@ class UserConverter(BaseConverter):
         return str(user.id)
 
 
-class HabitConverter(BaseConverter):
-    def to_python(self, habit_id):
-        habit = Habit.query.get(habit_id)
-        if habit is None:
-            raise NotFound
-        return habit
+# class HabitConverter(BaseConverter):
+#     def to_python(self, habit_id):
+#         habit = Habit.query.get(habit_id)
+#         if habit is None:
+#             raise NotFound
+#         return habit
 
-    def to_url(self, habit):
-        return str(habit.id)
-
+#     def to_url(self, habit):
+#         return str(habit.id)
 

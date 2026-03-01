@@ -19,6 +19,15 @@ def create_app():
     app.cli.add_command(models.init_db_command)
     app.cli.add_command(models.seed_db_command)
     app.cli.add_command(models.check_db_command)
+
+    from . import models
+    from . import api
+    from .utils import UserConverter, HabitConverter
+
+    app.url_map.converters["user"] = UserConverter
+    app.url_map.converters["habit"] = HabitConverter # Still not sure about this,
+
+    app.register_blueprint(api.api_bp)
     return app
 
 @event.listens_for(Engine, "connect")
