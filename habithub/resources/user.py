@@ -1,5 +1,5 @@
 from flask import Response, request
-from flask_restful import Resource, api
+from flask_restful import Resource, Api
 from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, UnsupportedMediaType

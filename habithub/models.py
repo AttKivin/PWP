@@ -99,3 +99,21 @@ class Tracking(db.Model):
             self.log_time = datetime.fromisoformat(value)
         except Exception as exc:
             raise ValueError("log_time must be ISO date-time (e.g. 2026-03-01T12:30:00Z)") from exc
+
+@click.command("init-db")
+@with_appcontext
+def init_db_command():
+    db.create_all()
+    print("Database create successfully")
+
+@click.command("seed")
+@with_appcontext
+def seed_db_command():
+    from scripts.seed_db import seed
+    seed()
+
+@click.command("check")
+@with_appcontext
+def check_db_command():
+    from scripts.check_db import check
+    check()

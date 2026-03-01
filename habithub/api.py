@@ -6,13 +6,13 @@ from .resources.habit import HabitCollection, HabitItem
 from .resources.reminder import ReminderCollection, ReminderItem
 from .resources.tracking import TrackingCollection, TrackingItem
 
-from .views import views
+from .views import entry
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 api = Api(api_bp)
 
-api_bp.add_url_rule("/", "entry", views.entry)
+api_bp.add_url_rule("/", "entry", entry)
 
 
 api.add_resource(UserCollection, "/users/")
