@@ -2,18 +2,27 @@ from flask import Response, request, url_for
 from flask_restful import Resource
 from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import BadRequest, Conflict, UnsupportedMediaType
+from werkzeug.exceptions import BadRequest, Conflict, NotFound, UnsupportedMediaType
 
 from habithub import db
 from habithub.models import Reminder
 
 
+def _check_reminder_ownership(user, habit, reminder=None):
+    if habit.user_id != user.id:
+        raise NotFound
+    if reminder is not None and reminder.habit_id != habit.id:
+        raise NotFound
+
+
 class ReminderItem(Resource):
     """Resource for managing a single reminder."""
     def get(self, user, habit, reminder):
+        _check_reminder_ownership(user, habit, reminder)
         return reminder.serialize()
 
     def put(self, user, habit, reminder):
+        _check_reminder_ownership(user, habit, reminder)
         if not request.json:
             raise UnsupportedMediaType
         try:
@@ -31,6 +40,7 @@ class ReminderItem(Resource):
         return Response(status=204)
 
     def delete(self, user, habit, reminder):
+        _check_reminder_ownership(user, habit, reminder)
         db.session.delete(reminder)
         db.session.commit()
         return Response(status=204)
@@ -39,10 +49,12 @@ class ReminderItem(Resource):
 class ReminderCollection(Resource):
     """Resource for managing the collection of reminders for a habit."""
     def get(self, user, habit):
+        _check_reminder_ownership(user, habit)
         reminders = Reminder.query.filter_by(habit_id=habit.id).all()
         return [r.serialize() for r in reminders]
 
     def post(self, user, habit):
+        _check_reminder_ownership(user, habit)
         if not request.json:
             raise UnsupportedMediaType
         try:

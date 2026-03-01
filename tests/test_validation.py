@@ -13,8 +13,7 @@ def _valid_user():
 def _valid_habit():
     return {
         "name": "Go to the gym",
-        "active": True,
-        "creation_date": "2024-01-01T00:00:00"
+        "active": True
     }
 
 def _valid_reminder():

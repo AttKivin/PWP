@@ -1,11 +1,12 @@
 from werkzeug.routing import BaseConverter
 from flask import request
 from werkzeug.exceptions import Forbidden, NotFound
+from . import db
 from .models import User, Habit, Reminder, Tracking
 
 class UserConverter(BaseConverter):
     def to_python(self, user_id):
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if user is None:
             raise NotFound
         return user
@@ -16,7 +17,7 @@ class UserConverter(BaseConverter):
 
 class HabitConverter(BaseConverter):
     def to_python(self, habit_id):
-        habit = Habit.query.get(habit_id)
+        habit = db.session.get(Habit, habit_id)
         if habit is None:
             raise NotFound
         return habit
@@ -27,7 +28,7 @@ class HabitConverter(BaseConverter):
 
 class ReminderConverter(BaseConverter):
     def to_python(self, reminder_id):
-        reminder = Reminder.query.get(reminder_id)
+        reminder = db.session.get(Reminder, reminder_id)
         if reminder is None:
             raise NotFound
         return reminder
@@ -38,7 +39,7 @@ class ReminderConverter(BaseConverter):
 
 class TrackingConverter(BaseConverter):
     def to_python(self, tracking_id):
-        tracking = Tracking.query.get(tracking_id)
+        tracking = db.session.get(Tracking, tracking_id)
         if tracking is None:
             raise NotFound
         return tracking

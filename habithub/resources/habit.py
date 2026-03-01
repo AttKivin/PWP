@@ -2,18 +2,24 @@ from flask import Response, request, url_for
 from flask_restful import Resource
 from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import BadRequest, Conflict, UnsupportedMediaType
-
+from werkzeug.exceptions import BadRequest, Conflict, NotFound, UnsupportedMediaType
 from habithub import db
 from habithub.models import Habit
+
+
+def _check_habit_owner(user, habit):
+    if habit.user_id != user.id:
+        raise NotFound
 
 
 class HabitItem(Resource):
     """Resource for managing a single habit."""
     def get(self, user, habit):
+        _check_habit_owner(user, habit)
         return habit.serialize()
 
     def put(self, user, habit):
+        _check_habit_owner(user, habit)
         if not request.json:
             raise UnsupportedMediaType
         try:
@@ -31,6 +37,7 @@ class HabitItem(Resource):
         return Response(status=204)
 
     def delete(self, user, habit):
+        _check_habit_owner(user, habit)
         db.session.delete(habit)
         db.session.commit()
         return Response(status=204)
