@@ -9,7 +9,7 @@ from habithub.models import Reminder
 from habithub.auth import require_api_key
 
 
-def _check_reminder_ownership(user, habit, reminder=None):
+def _check_reminder_owner(user, habit, reminder=None):
     if habit.user_id != user.id:
         raise NotFound
     if reminder is not None and reminder.habit_id != habit.id:
@@ -22,12 +22,12 @@ class ReminderItem(Resource):
     @require_api_key
     @cache.cached()
     def get(self, user, habit, reminder):
-        _check_reminder_ownership(user, habit, reminder)
+        _check_reminder_owner(user, habit, reminder)
         return reminder.serialize()
 
     @require_api_key
     def put(self, user, habit, reminder):
-        _check_reminder_ownership(user, habit, reminder)
+        _check_reminder_owner(user, habit, reminder)
         if not request.json:
             raise UnsupportedMediaType
         try:
@@ -47,7 +47,7 @@ class ReminderItem(Resource):
 
     @require_api_key
     def delete(self, user, habit, reminder):
-        _check_reminder_ownership(user, habit, reminder)
+        _check_reminder_owner(user, habit, reminder)
         self._clear_cache(user, habit)
         db.session.delete(reminder)
         db.session.commit()
@@ -67,13 +67,13 @@ class ReminderCollection(Resource):
     @require_api_key
     @cache.cached()
     def get(self, user, habit):
-        _check_reminder_ownership(user, habit)
+        _check_reminder_owner(user, habit)
         reminders = Reminder.query.filter_by(habit_id=habit.id).all()
         return [r.serialize() for r in reminders]
 
     @require_api_key
     def post(self, user, habit):
-        _check_reminder_ownership(user, habit)
+        _check_reminder_owner(user, habit)
         if not request.json:
             raise UnsupportedMediaType
         try:

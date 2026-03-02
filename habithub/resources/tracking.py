@@ -9,7 +9,7 @@ from habithub.models import Tracking
 from habithub.auth import require_api_key
 
 
-def _check_tracking_ownership(user, habit, tracking=None):
+def _check_tracking_owner(user, habit, tracking=None):
     if habit.user_id != user.id:
         raise NotFound
     if tracking is not None and tracking.habit_id != habit.id:
@@ -22,12 +22,12 @@ class TrackingItem(Resource):
     @require_api_key
     @cache.cached()
     def get(self, user, habit, tracking):
-        _check_tracking_ownership(user, habit, tracking)
+        _check_tracking_owner(user, habit, tracking)
         return tracking.serialize()
 
     @require_api_key
     def put(self, user, habit, tracking):
-        _check_tracking_ownership(user, habit, tracking)
+        _check_tracking_owner(user, habit, tracking)
         if not request.json:
             raise UnsupportedMediaType
         try:
@@ -47,7 +47,7 @@ class TrackingItem(Resource):
 
     @require_api_key
     def delete(self, user, habit, tracking):
-        _check_tracking_ownership(user, habit, tracking)
+        _check_tracking_owner(user, habit, tracking)
         self._clear_cache(user, habit)
         db.session.delete(tracking)
         db.session.commit()
@@ -67,13 +67,13 @@ class TrackingCollection(Resource):
     @require_api_key
     @cache.cached()
     def get(self, user, habit):
-        _check_tracking_ownership(user, habit)
+        _check_tracking_owner(user, habit)
         logs = Tracking.query.filter_by(habit_id=habit.id).all()
         return [l.serialize() for l in logs]
 
     @require_api_key
     def post(self, user, habit):
-        _check_tracking_ownership(user, habit)
+        _check_tracking_owner(user, habit)
         if not request.json:
             raise UnsupportedMediaType
         try:
