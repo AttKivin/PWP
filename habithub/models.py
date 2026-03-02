@@ -1,5 +1,11 @@
-"""This file holds the models that represents database tables"""
+"""
+Models for the HabitHub API.
 
+Note: The overall structure (model-level serialize/deserialize methods and model-level json_schema())
+follows patterns shown in the course material (Exercise 2: Implementing REST APIs with Flask).
+
+AI usage: ChatGPT was used to review and clarify design choices.
+"""
 import json
 import os
 from datetime import datetime, time as dtime, UTC
