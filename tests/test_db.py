@@ -29,6 +29,7 @@ def db_handle():
     db.session.rollback()
     db.drop_all()
     db.session.remove()
+    db.engine.dispose()
     ctx.pop()
     os.close(db_fd)
     os.unlink(db_fname)

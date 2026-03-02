@@ -18,6 +18,7 @@ def app():
         _cache.clear()
         _db.session.remove()
         _db.drop_all()
+        _db.engine.dispose()
 
     os.close(db_fd)
     os.unlink(db_path)
