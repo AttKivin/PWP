@@ -69,7 +69,7 @@ class Habit(db.Model):
     reminders = db.relationship("Reminder", back_populates="habit", cascade="all, delete-orphan")
 
     # Relationship to Tracking
-    tracking_logs = db.relationship("Tracking", back_populates="habit")
+    tracking_logs = db.relationship("Tracking", back_populates="habit", cascade="all, delete-orphan")
     @staticmethod
     def json_schema():
         """Returns the schema needed for validation """
@@ -84,10 +84,10 @@ class Habit(db.Model):
             "active": self.active,
             "creation_date": self.creation_date.isoformat(),
             "_links": {
-                "self": {"href": f"/habits/{self.id}"},
+                "self": {"href": f"/users/{self.user_id}/habits/{self.id}"},
                 "user": {"href": f"/users/{self.user_id}"},
-                "reminders": {"href": f"/habits/{self.id}/reminders"},
-                "tracking": {"href": f"/habits/{self.id}/tracking"}
+                "reminders": {"href": f"/users/{self.user_id}/habits/{self.id}/reminders"},
+                "tracking": {"href": f"/users/{self.user_id}/habits/{self.id}/tracking"}
             }
         }
 
@@ -121,9 +121,9 @@ class Reminder(db.Model):
             "reminded_time": self.reminded_time.strftime("%H:%M"),
             "creation_date": self.creation_date.isoformat(),
             "_links": {
-                "self": {"href": f"/reminders/{self.id}"},
-                "habit": {"href": f"/habits/{self.habit_id}"},
-                "collection": {"href": f"/habits/{self.habit_id}/reminders"}
+                "self": {"href": f"/users/{self.habit.user_id}/habits/{self.habit_id}/reminders/{self.id}"},
+                "habit": {"href": f"/users/{self.habit.user_id}/habits/{self.habit_id}"},
+                "collection": {"href": f"/users/{self.habit.user_id}/habits/{self.habit_id}/reminders"}
             }
         }
 
@@ -158,9 +158,9 @@ class Tracking(db.Model):
             "habit_id": self.habit_id,
             "log_time": self.log_time.isoformat(),
             "_links": {
-                "self": {"href": f"/tracking/{self.id}"},
-                "habit": {"href": f"/habits/{self.habit_id}"},
-                "collection": {"href": f"/habits/{self.habit_id}/tracking"}
+                "self": {"href": f"/users/{self.habit.user_id}/habits/{self.habit_id}/tracking/{self.id}"},
+                "habit": {"href": f"/users/{self.habit.user_id}/habits/{self.habit_id}"},
+                "collection": {"href": f"/users/{self.habit.user_id}/habits/{self.habit_id}/tracking"}
             }
         }
 
