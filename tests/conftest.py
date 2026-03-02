@@ -2,6 +2,7 @@ import os
 import tempfile 
 import pytest
 from habithub import create_app, db as _db
+from habithub.auth import API_KEY
 
 @pytest.fixture
 def app():
@@ -21,4 +22,7 @@ def app():
 
 @pytest.fixture
 def client(app):
-    return app.test_client()
+    """Return a test client that sends the API key header with every request."""
+    client = app.test_client()
+    client.environ_base["HTTP_X_API_KEY"] = API_KEY
+    return client
