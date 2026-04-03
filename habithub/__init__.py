@@ -8,6 +8,7 @@ from flask import Flask
 from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
+from flasgger import Swagger
 from sqlalchemy.engine import Engine
 
 db = SQLAlchemy()
@@ -43,6 +44,15 @@ def create_app():
     app.url_map.converters["tracking"] = TrackingConverter
 
     app.register_blueprint(api.api_bp)
+
+    doc_path = os.path.join(os.path.dirname(__file__), "doc", "habithub.yml")
+    app.config["SWAGGER"] = {
+        "title": "HabitHub API",
+        "openapi": "3.0.4",
+        "doc_dir": os.path.join(os.path.dirname(__file__), "doc"),
+    }
+    Swagger(app, template_file=doc_path)
+
     return app
 
 @event.listens_for(Engine, "connect")

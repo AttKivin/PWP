@@ -71,4 +71,12 @@ pylint tests
 
 __Remember to include all required documentation and HOWTOs, including how to create and populate the database, how to run and test the API, the url to the entrypoint, instructions on how to setup and run the client, instructions on how to setup and run the axiliary service and instructions on how to deploy the api in a production environment__
 
+## API Documentation
 
+### API entrypoints
+- API base URL: `/api/`
+- Swagger UI: `/apidocs/`
+- OpenAPI JSON: `/apispec_1.json`
+
+### Own media type implementation
+This API does not define a custom media type. It uses `application/json` for request and response bodies.

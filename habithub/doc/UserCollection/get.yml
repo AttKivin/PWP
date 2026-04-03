@@ -1,0 +1,37 @@
+---
+description: Get the list of all users
+security:
+- apiKey: []
+responses:
+  '200':
+    description: List of all users with their details and hypermedia links
+    content:
+      application/json:
+        example:
+        - id: 1
+          first_name: Aleem
+          last_name: Ud Din
+          email: aleem.uddin@example.com
+          _links:
+            self:
+              href: /users/1
+            habits:
+              href: /users/1/habits
+        - id: 2
+          first_name: Abdulmomen
+          last_name: Ghalkha
+          email: abdulmomen.ghalkha@example.com
+          _links:
+            self:
+              href: /users/2
+            habits:
+              href: /users/2/habits
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401

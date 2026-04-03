@@ -1,0 +1,39 @@
+---
+description: Get details of a single user
+security:
+- apiKey: []
+parameters:
+- $ref: '#/components/parameters/user'
+responses:
+  '200':
+    description: Data of a single user including hypermedia links
+    content:
+      application/json:
+        example:
+          id: 1
+          first_name: Aleem
+          last_name: Ud Din
+          email: aleem.uddin@example.com
+          _links:
+            self:
+              href: /users/1
+            habits:
+              href: /users/1/habits
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401
+  '404':
+    description: The user was not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: The user was not found
+          status: 404

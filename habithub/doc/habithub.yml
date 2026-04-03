@@ -1,0 +1,121 @@
+---
+openapi: 3.0.4
+info:
+  title: HabitHub API
+  version: 1.0.0
+  description: |
+    HabitHub is a habit tracking API that allows users to create and manage habits,
+    set reminders, and log tracking entries. The API uses JSON for request and response
+    bodies, and requires an API key for authentication via the X-API-KEY header.
+    Error responses use a shared JSON format defined by components.schemas.Error.
+servers:
+- url: /
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      name: X-API-KEY
+      in: header
+      description: API key required for all operations. Pass as the X-API-KEY header.
+  schemas:
+    User:
+      type: object
+      properties:
+        first_name:
+          description: User's first name
+          type: string
+          minLength: 1
+          maxLength: 64
+        last_name:
+          description: User's last name
+          type: string
+          minLength: 1
+          maxLength: 64
+        email:
+          description: User's unique email address
+          type: string
+          minLength: 3
+          maxLength: 128
+          format: email
+      required:
+      - first_name
+      - last_name
+      - email
+      additionalProperties: false
+    Habit:
+      type: object
+      properties:
+        name:
+          description: Name of the habit
+          type: string
+          minLength: 1
+          maxLength: 64
+        active:
+          description: Whether the habit is currently active
+          type: boolean
+      required:
+      - name
+      additionalProperties: false
+    Reminder:
+      type: object
+      properties:
+        reminded_time:
+          description: Time of day for the reminder in HH:MM format
+          type: string
+          pattern: "^([01]\\d|2[0-3]):[0-5]\\d$"
+      required:
+      - reminded_time
+      additionalProperties: false
+    Tracking:
+      type: object
+      properties:
+        log_time:
+          description: ISO 8601 date-time when the habit was performed
+          type: string
+          format: date-time
+      required:
+      - log_time
+      additionalProperties: false
+    Error:
+      type: object
+      description: Standard JSON error payload returned for non-2xx responses.
+      properties:
+        message:
+          type: string
+          description: Human-readable explanation of the error.
+        status:
+          type: integer
+          description: HTTP status code for the error.
+      required:
+      - message
+      - status
+      additionalProperties: false
+  parameters:
+    user:
+      description: The user's unique integer ID
+      in: path
+      name: user
+      required: true
+      schema:
+        type: integer
+    habit:
+      description: The habit's unique integer ID
+      in: path
+      name: habit
+      required: true
+      schema:
+        type: integer
+    reminder:
+      description: The reminder's unique integer ID
+      in: path
+      name: reminder
+      required: true
+      schema:
+        type: integer
+    tracking:
+      description: The tracking log's unique integer ID
+      in: path
+      name: tracking
+      required: true
+      schema:
+        type: integer

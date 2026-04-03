@@ -1,0 +1,65 @@
+---
+description: Replace user data with new values
+security:
+- apiKey: []
+parameters:
+- $ref: '#/components/parameters/user'
+requestBody:
+  description: JSON document containing updated user data (all fields required)
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/User'
+      example:
+        first_name: Atte
+        last_name: Kiviniemi
+        email: atte.kiviniemi.updated@example.com
+responses:
+  '204':
+    description: The user was updated successfully
+  '400':
+    description: Request body failed JSON schema validation
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Request body failed JSON schema validation
+          status: 400
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401
+  '404':
+    description: The user was not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: The user was not found
+          status: 404
+  '409':
+    description: A user with the given email already exists
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: A user with the given email already exists
+          status: 409
+  '415':
+    description: Request content type was not application/json
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Request content type was not application/json
+          status: 415
