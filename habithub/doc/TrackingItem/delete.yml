@@ -1,1 +1,29 @@
-
+---
+description: Delete a tracking log
+security:
+  - apiKey: []
+parameters:
+  - $ref: '#/components/parameters/user'
+  - $ref: '#/components/parameters/habit'
+  - $ref: '#/components/parameters/tracking'
+responses:
+  '204':
+    description: The tracking log was deleted successfully
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401
+  '404':
+    description: The tracking log was not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: The tracking log was not found
+          status: 404

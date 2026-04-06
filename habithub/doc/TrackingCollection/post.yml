@@ -1,1 +1,60 @@
-
+---
+description: Create a new tracking log for a habit
+security:
+  - apiKey: []
+parameters:
+  - $ref: '#/components/parameters/user'
+  - $ref: '#/components/parameters/habit'
+requestBody:
+  description: JSON document containing tracking log data
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/Tracking'
+      example:
+        log_time: "2026-03-01T12:30:00Z"
+responses:
+  '201':
+    description: The tracking log was created successfully
+    headers:
+      Location:
+        description: URI of the newly created tracking log
+        schema:
+          type: string
+  '400':
+    description: Request body failed JSON schema validation
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Request body failed JSON schema validation
+          status: 400
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401
+  '404':
+    description: The habit was not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: The habit was not found
+          status: 404
+  '415':
+    description: Request content type was not application/json
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Request content type was not application/json
+          status: 415

@@ -1,3 +1,4 @@
 instance/
 __pycache__/
 .vscode
+pwp_env/

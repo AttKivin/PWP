@@ -1,1 +1,45 @@
-
+---
+description: Get the list of all habits for a user
+security:
+  - apiKey: []
+responses:
+  '200':
+    description: List of all habits for a user with their details and hypermedia links
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/Habit'
+        example:
+          - id: 1
+            name: Water Drinking
+            active: true
+            creation_date: 2025-01-10
+            _links:
+              self:
+                href: /users/1/habits/1
+              reminders:
+                href: /users/1/habits/1/reminders
+              tracking:
+                href: /users/1/habits/1/tracking
+          - id: 2
+            name: 1 KM running
+            active: false
+            creation_date: 2026-01-20
+            _links:
+              self:
+                href: /users/1/habits/2
+              reminders:
+                href: /users/1/habits/2/reminders
+              tracking:
+                href: /users/1/habits/2/tracking
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401
