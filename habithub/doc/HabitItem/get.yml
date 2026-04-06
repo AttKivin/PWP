@@ -1,1 +1,42 @@
-
+---
+description: Get details of a single habit for a certain user
+security:
+  - apiKey: []
+parameters:
+    - $ref: '#/components/parameters/user'
+    - $ref: '#/components/parameters/habit'
+responses:
+  '200':
+    description: Data of a single habit for a user including hypermedia links
+    content:
+      application/json:
+        example:
+          id: 1
+          name: Water Drinking
+          active: true
+          creation_date: 2025-01-10
+          _links:
+            self:
+              href: /users/1/habits/1
+            reminders:
+              href: /users/1/habits/1/reminders
+            tracking:
+              href: /users/1/habits/1/tracking
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401
+  '404':
+    description: The habit was not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: The habit was not found
+          status: 404

@@ -1,1 +1,56 @@
-
+---
+description: Replace reminder data with new values
+security:
+  - apiKey: []
+parameters:
+  - $ref: '#/components/parameters/user'
+  - $ref: '#/components/parameters/habit'
+  - $ref: '#/components/parameters/reminder'
+requestBody:
+  description: JSON document containing updated reminder data
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/Reminder'
+      example:
+        reminded_time: "14:30"
+responses:
+  '204':
+    description: The reminder was updated successfully
+  '400':
+    description: Request body failed JSON schema validation
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Request body failed JSON schema validation
+          status: 400
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401
+  '404':
+    description: The reminder was not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: The reminder was not found
+          status: 404
+  '415':
+    description: Request content type was not application/json
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Request content type was not application/json
+          status: 415

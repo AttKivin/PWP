@@ -1,1 +1,28 @@
-
+---
+description: Delete a habit and all associated reminders and tracking logs
+security:
+  - apiKey: []
+parameters:
+  - $ref: '#/components/parameters/user'
+  - $ref: '#/components/parameters/habit'
+responses:
+  '204':
+    description: The habit was deleted successfully
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401
+  '404':
+    description: The habit was not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: The habit was not found
+          status: 404

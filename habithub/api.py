@@ -38,3 +38,5 @@ api.add_resource(TrackingCollection, "/users/<user:user>/habits/<habit:habit>/tr
 api.add_resource(
     TrackingItem,
     "/users/<user:user>/habits/<habit:habit>/tracking/<tracking:tracking>/")
+
+

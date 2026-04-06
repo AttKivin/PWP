@@ -1,1 +1,43 @@
-
+---
+description: Get details of a single tracking log
+security:
+  - apiKey: []
+parameters:
+  - $ref: '#/components/parameters/user'
+  - $ref: '#/components/parameters/habit'
+  - $ref: '#/components/parameters/tracking'
+responses:
+  '200':
+    description: Tracking log details including hypermedia links
+    content:
+      application/json:
+        example:
+          id: 1
+          habit_id: 1
+          log_time: "2026-03-01T12:30:00Z"
+          creation_date: "2026-03-01T12:30:00Z"
+          _links:
+            self:
+              href: /users/1/habits/1/tracking/1
+            habit:
+              href: /users/1/habits/1
+            collection:
+              href: /users/1/habits/1/tracking
+  '401':
+    description: Invalid or missing API key
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: Invalid or missing API key
+          status: 401
+  '404':
+    description: The tracking log was not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+        example:
+          message: The tracking log was not found
+          status: 404
