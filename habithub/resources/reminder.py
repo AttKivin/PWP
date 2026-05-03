@@ -1,5 +1,8 @@
 """Defines resources needed to access reminder data """
 
+import os
+
+from flasgger import swag_from
 from flask import Response, request, url_for
 from flask_restful import Resource
 from jsonschema import ValidationError, validate
@@ -9,6 +12,9 @@ from werkzeug.exceptions import BadRequest, Conflict, NotFound, UnsupportedMedia
 from habithub import db, cache
 from habithub.models import Reminder
 from habithub.auth import require_api_key
+
+
+DOC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "doc")
 
 
 def _check_reminder_owner(user, habit, reminder=None):
@@ -21,6 +27,7 @@ def _check_reminder_owner(user, habit, reminder=None):
 class ReminderItem(Resource):
     """Resource for managing a single reminder."""
 
+    @swag_from(os.path.join(DOC_DIR, "ReminderItem", "get.yml"))
     @require_api_key
     @cache.cached()
     def get(self, user, habit, reminder):
@@ -28,6 +35,7 @@ class ReminderItem(Resource):
         _check_reminder_owner(user, habit, reminder)
         return reminder.serialize()
 
+    @swag_from(os.path.join(DOC_DIR, "ReminderItem", "put.yml"))
     @require_api_key
     def put(self, user, habit, reminder):
         """PUT request"""
@@ -49,6 +57,7 @@ class ReminderItem(Resource):
         self._clear_cache(user, habit)
         return Response(status=204)
 
+    @swag_from(os.path.join(DOC_DIR, "ReminderItem", "delete.yml"))
     @require_api_key
     def delete(self, user, habit, reminder):
         """DELETE request"""
@@ -69,6 +78,7 @@ class ReminderItem(Resource):
 class ReminderCollection(Resource):
     """Resource for managing the collection of reminders for a habit."""
 
+    @swag_from(os.path.join(DOC_DIR, "ReminderCollection", "get.yml"))
     @require_api_key
     @cache.cached()
     def get(self, user, habit):
@@ -77,6 +87,7 @@ class ReminderCollection(Resource):
         reminders = Reminder.query.filter_by(habit_id=habit.id).all()
         return [r.serialize() for r in reminders]
 
+    @swag_from(os.path.join(DOC_DIR, "ReminderCollection", "post.yml"))
     @require_api_key
     def post(self, user, habit):
         """POST request"""

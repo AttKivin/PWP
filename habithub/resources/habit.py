@@ -1,5 +1,8 @@
 """Defines resources needed to access habit data """
 
+import os
+
+from flasgger import swag_from
 from flask import Response, request, url_for
 from flask_restful import Resource
 from jsonschema import ValidationError, validate
@@ -8,6 +11,9 @@ from werkzeug.exceptions import BadRequest, Conflict, NotFound, UnsupportedMedia
 from habithub import db, cache
 from habithub.models import Habit
 from habithub.auth import require_api_key
+
+
+DOC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "doc")
 
 
 def _check_habit_owner(user, habit):
@@ -19,6 +25,7 @@ def _check_habit_owner(user, habit):
 class HabitItem(Resource):
     """Resource for managing a single habit."""
 
+    @swag_from(os.path.join(DOC_DIR, "HabitItem", "get.yml"))
     @require_api_key
     @cache.cached()
     def get(self, user, habit):
@@ -26,6 +33,7 @@ class HabitItem(Resource):
         _check_habit_owner(user, habit)
         return habit.serialize()
 
+    @swag_from(os.path.join(DOC_DIR, "HabitItem", "put.yml"))
     @require_api_key
     def put(self, user, habit):
         """PUT request"""
@@ -47,6 +55,7 @@ class HabitItem(Resource):
         self._clear_cache(user)
         return Response(status=204)
 
+    @swag_from(os.path.join(DOC_DIR, "HabitItem", "delete.yml"))
     @require_api_key
     def delete(self, user, habit):
         """DELETE request"""
@@ -67,6 +76,7 @@ class HabitItem(Resource):
 class HabitCollection(Resource):
     """Resource for managing the collection of habits for a user."""
 
+    @swag_from(os.path.join(DOC_DIR, "HabitCollection", "get.yml"))
     @require_api_key
     @cache.cached()
     def get(self, user):
@@ -74,6 +84,7 @@ class HabitCollection(Resource):
         habits = Habit.query.filter_by(user_id=user.id).all()
         return [habit.serialize() for habit in habits]
 
+    @swag_from(os.path.join(DOC_DIR, "HabitCollection", "post.yml"))
     @require_api_key
     def post(self, user):
         """POST request"""

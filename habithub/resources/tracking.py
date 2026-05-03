@@ -1,3 +1,5 @@
+import os
+from flasgger import swag_from
 from flask import Response, request, url_for
 from flask_restful import Resource
 from jsonschema import ValidationError, validate
@@ -7,6 +9,9 @@ from werkzeug.exceptions import BadRequest, Conflict, NotFound, UnsupportedMedia
 from habithub import db, cache
 from habithub.models import Tracking
 from habithub.auth import require_api_key
+
+
+DOC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "doc")
 
 
 def _check_tracking_owner(user, habit, tracking=None):
@@ -20,6 +25,7 @@ def _check_tracking_owner(user, habit, tracking=None):
 class TrackingItem(Resource):
     """Resource for managing a single tracking log."""
 
+    @swag_from(os.path.join(DOC_DIR, "TrackingItem", "get.yml"))
     @require_api_key
     @cache.cached()
     def get(self, user, habit, tracking):
@@ -27,6 +33,7 @@ class TrackingItem(Resource):
         _check_tracking_owner(user, habit, tracking)
         return tracking.serialize()
 
+    @swag_from(os.path.join(DOC_DIR, "TrackingItem", "put.yml"))
     @require_api_key
     def put(self, user, habit, tracking):
         """PUT request"""
@@ -48,6 +55,7 @@ class TrackingItem(Resource):
         self._clear_cache(user, habit)
         return Response(status=204)
 
+    @swag_from(os.path.join(DOC_DIR, "TrackingItem", "delete.yml"))
     @require_api_key
     def delete(self, user, habit, tracking):
         """DELETE request"""
@@ -68,6 +76,7 @@ class TrackingItem(Resource):
 class TrackingCollection(Resource):
     """Resource for managing the collection of tracking logs for a habit."""
 
+    @swag_from(os.path.join(DOC_DIR, "TrackingCollection", "get.yml"))
     @require_api_key
     @cache.cached()
     def get(self, user, habit):
@@ -76,6 +85,7 @@ class TrackingCollection(Resource):
         logs = Tracking.query.filter_by(habit_id=habit.id).all()
         return [l.serialize() for l in logs]
 
+    @swag_from(os.path.join(DOC_DIR, "TrackingCollection", "post.yml"))
     @require_api_key
     def post(self, user, habit):
         """POST request"""

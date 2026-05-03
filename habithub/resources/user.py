@@ -1,5 +1,8 @@
 """Defines resources needed to access user data """
 
+import os
+
+from flasgger import swag_from
 from flask import Response, request, url_for
 from flask_restful import Resource
 from jsonschema import ValidationError, validate
@@ -11,15 +14,20 @@ from habithub.models import User
 from habithub.auth import require_api_key
 
 
+DOC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "doc")
+
+
 class UserItem(Resource):
     """Resource for managing a single user."""
 
+    @swag_from(os.path.join(DOC_DIR, "UserItem", "get.yml"))
     @require_api_key
     @cache.cached()
     def get(self, user):
         """GET request"""
         return user.serialize()
 
+    @swag_from(os.path.join(DOC_DIR, "UserItem", "put.yml"))
     @require_api_key
     def put(self, user):
         """PUT request"""
@@ -40,6 +48,7 @@ class UserItem(Resource):
         self._clear_cache()
         return Response(status=204)
 
+    @swag_from(os.path.join(DOC_DIR, "UserItem", "delete.yml"))
     @require_api_key
     def delete(self, user):
         """DELETE request"""
@@ -59,6 +68,7 @@ class UserItem(Resource):
 class UserCollection(Resource):
     """Resource for managing the collection of users."""
 
+    @swag_from(os.path.join(DOC_DIR, "UserCollection", "get.yml"))
     @require_api_key
     @cache.cached()
     def get(self):
@@ -66,6 +76,7 @@ class UserCollection(Resource):
         response_data = [user.serialize() for user in User.query.all()]
         return response_data
 
+    @swag_from(os.path.join(DOC_DIR, "UserCollection", "post.yml"))
     @require_api_key
     def post(self):
         """POST request"""
