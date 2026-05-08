@@ -1,0 +1,73 @@
+﻿{% extends "base.html" %}
+{% block title %}Habits — HabitHub{% endblock %}
+
+{% block content %}
+<div class="page-hd">
+  <h2>Habits</h2>
+  <p>Manage your habits and reminders</p>
+</div>
+
+<div class="card">
+  <div class="card-hd">Add Habit</div>
+  <form method="post" action="{{ url_for('create_habit') }}" class="form-row">
+    <div class="form-field">
+      <label class="field-label">Habit name</label>
+      <input name="name" required placeholder="e.g. Morning run">
+    </div>
+    <button type="submit">Add habit</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-hd">Your Habits</div>
+  {% if habits %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Active</th>
+          <th>Created</th>
+          <th>Reminders</th>
+          <th>Edit</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in habits %}
+        <tr>
+          <td><strong>{{ h.name }}</strong></td>
+          <td>
+            {% if h.active %}
+            <span class="pill pill-ok">Active</span>
+            {% else %}
+            <span class="pill pill-no">Inactive</span>
+            {% endif %}
+          </td>
+          <td style="color:var(--muted);">{{ h.creation_date[:10] }}</td>
+          <td><a href="{{ url_for('reminders', habit_id=h.id) }}">Reminders &rarr;</a></td>
+          <td>
+            <form method="post" action="{{ url_for('edit_habit', habit_id=h.id) }}" class="form-row" style="flex-wrap:nowrap;">
+              <input name="name" value="{{ h.name }}" required style="width:130px;">
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;color:var(--muted);cursor:pointer;white-space:nowrap;">
+                <input type="checkbox" name="active" value="1" {% if h.active %}checked{% endif %}>
+                Active
+              </label>
+              <button type="submit" class="btn-secondary btn-sm">Save</button>
+            </form>
+          </td>
+          <td>
+            <form method="post" action="{{ url_for('delete_habit', habit_id=h.id) }}" onsubmit="return confirm('Delete this habit and all its data?');">
+              <button type="submit" class="btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted">No habits yet. Add one above to get started.</p>
+  {% endif %}
+</div>
+{% endblock %}

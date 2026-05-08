@@ -1,0 +1,61 @@
+﻿{% extends "base.html" %}
+{% block title %}Reminders — HabitHub{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('habits') }}" class="back-link">&larr; Back to Habits</a>
+
+<div class="page-hd">
+  <h2>Reminders</h2>
+  <p>{{ habit.name }}</p>
+</div>
+
+<div class="card">
+  <div class="card-hd">Add Reminder</div>
+  <form method="post" action="{{ url_for('create_reminder', habit_id=habit.id) }}" class="form-row">
+    <div class="form-field">
+      <label class="field-label">Time (HH:MM)</label>
+      <input type="time" name="reminded_time" required>
+    </div>
+    <button type="submit">Add reminder</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-hd">Reminders</div>
+  {% if reminders %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Created</th>
+          <th>Edit</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reminders %}
+        <tr>
+          <td><strong>{{ r.reminded_time }}</strong></td>
+          <td style="color:var(--muted);">{{ r.creation_date[:10] }}</td>
+          <td>
+            <form method="post" action="{{ url_for('edit_reminder', habit_id=habit.id, reminder_id=r.id) }}" class="form-row" style="flex-wrap:nowrap;">
+              <input type="time" name="reminded_time" value="{{ r.reminded_time }}" required>
+              <button type="submit" class="btn-secondary btn-sm">Save</button>
+            </form>
+          </td>
+          <td>
+            <form method="post" action="{{ url_for('delete_reminder', habit_id=habit.id, reminder_id=r.id) }}" onsubmit="return confirm('Delete this reminder?');">
+              <button type="submit" class="btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted">No reminders yet. Add one above.</p>
+  {% endif %}
+</div>
+{% endblock %}
