@@ -12,7 +12,6 @@ pip install -r requirements.txt
 The HabitHub API server must be running first.
 
 ```bash
-cd client
 python web_client.py
 ```
 
