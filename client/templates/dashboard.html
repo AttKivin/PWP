@@ -30,12 +30,15 @@
   <div class="card-hd">Completion Rate</div>
   {% if habits %}
   <canvas id="habitChart" style="max-height: 240px;"></canvas>
+  <script id="habit-labels" type="application/json">{{ habits | map(attribute='name') | list | tojson }}</script>
+  <script id="habit-rate7" type="application/json">{{ habits | map(attribute='rate7') | list | tojson }}</script>
+  <script id="habit-rate30" type="application/json">{{ habits | map(attribute='rate30') | list | tojson }}</script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script>
     (function () {
-      const labels = {{ habits | map(attribute='name') | list | tojson }};
-      const rate7  = {{ habits | map(attribute='rate7')  | list | tojson }};
-      const rate30 = {{ habits | map(attribute='rate30') | list | tojson }};
+      const labels = JSON.parse(document.getElementById('habit-labels').textContent);
+      const rate7 = JSON.parse(document.getElementById('habit-rate7').textContent);
+      const rate30 = JSON.parse(document.getElementById('habit-rate30').textContent);
 
       new Chart(document.getElementById('habitChart'), {
         type: 'bar',
