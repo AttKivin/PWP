@@ -1,5 +1,7 @@
 """Test to validate that the schema is working as expected"""
 
+from datetime import datetime
+
 import pytest
 from jsonschema import validate, ValidationError
 from habithub.models import User, Habit, Reminder, Tracking
@@ -136,3 +138,25 @@ class TestTrackingSchema:
         del tracking_data["log_time"]
         with pytest.raises(ValidationError):
             validate(tracking_data, Tracking.json_schema())
+
+
+class TestModelDeserializeValidation:
+    """Test model-level deserialize validation paths."""
+
+    def test_reminder_deserialize_invalid_time_format(self):
+        """Reminder.deserialize should reject non-HH:MM values."""
+        reminder = Reminder()
+        with pytest.raises(ValueError):
+            reminder.deserialize({"reminded_time": "08:00:00"})
+
+    def test_tracking_deserialize_invalid_iso_datetime(self):
+        """Tracking.deserialize should reject invalid date-time strings."""
+        tracking = Tracking()
+        with pytest.raises(ValueError):
+            tracking.deserialize({"log_time": "not-an-iso-date"})
+
+    def test_tracking_deserialize_accepts_zulu_datetime(self):
+        """Tracking.deserialize should accept UTC timestamps ending in Z."""
+        tracking = Tracking()
+        tracking.deserialize({"log_time": "2026-03-01T12:00:00Z"})
+        assert isinstance(tracking.log_time, datetime)

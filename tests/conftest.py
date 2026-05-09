@@ -1,6 +1,14 @@
 import os
+import sys
 import tempfile 
+from pathlib import Path
+
 import pytest
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 from habithub import create_app, db as _db, cache as _cache
 from habithub.auth import API_KEY
 
@@ -29,3 +37,10 @@ def client(app):
     client = app.test_client()
     client.environ_base["HTTP_X_API_KEY"] = API_KEY
     return client
+
+
+@pytest.fixture
+def db_handle(app):
+    """Yield the shared SQLAlchemy handle bound to the isolated test app DB."""
+    with app.app_context():
+        yield _db

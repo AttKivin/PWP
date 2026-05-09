@@ -3,8 +3,16 @@ Test file for resources
 """
 
 from datetime import time
+import pytest
+from werkzeug.exceptions import NotFound
+
 from habithub import db as _db
+from habithub.constants import JSON
 from habithub.models import User, Habit, Reminder, Tracking
+from habithub.resources.habit import _check_habit_owner
+from habithub.resources.reminder import _check_reminder_owner
+from habithub.resources.tracking import _check_tracking_owner
+from habithub.views import entry
 
 
 # Helper functions for creating test data and making requests
@@ -42,6 +50,18 @@ def _create_habit(client, user_id):
 class TestUserCollection:
     """Test functions for UserCollection"""
     RESOURCE_URL = "/api/users/"
+
+    def test_get_unauthorized_missing_api_key(self, app):
+        """GET users without API key should be unauthorized."""
+        raw_client = app.test_client()
+        resp = raw_client.get(self.RESOURCE_URL)
+        assert resp.status_code == 401
+
+    def test_get_unauthorized_invalid_api_key(self, app):
+        """GET users with invalid API key should be unauthorized."""
+        raw_client = app.test_client()
+        resp = raw_client.get(self.RESOURCE_URL, headers={"X-API-KEY": "wrong"})
+        assert resp.status_code == 401
 
     def test_get_empty(self, client):
         """GET users when there are no users in the database."""
@@ -169,6 +189,12 @@ class TestHabitCollection:
         resp = client.post(f"/api/users/{user_id}/habits/", data="not json")
         assert resp.status_code == 415
 
+    def test_post_empty_json(self, client):
+        """POST with empty JSON payload should be rejected as unsupported media type."""
+        _, user_id = _create_user(client)
+        resp = client.post(f"/api/users/{user_id}/habits/", json={})
+        assert resp.status_code == 415
+
     def test_get_populated(self, client):
         """GET habits for a user that has multiple habits."""
         _, user_id = _create_user(client)
@@ -233,6 +259,13 @@ class TestHabitItem:
         resp = client.put(f"/api/users/{user_id}/habits/{habit_id}/", data="not json")
         assert resp.status_code == 415
 
+    def test_put_empty_json(self, client):
+        """PUT with empty JSON payload should be rejected as unsupported media type."""
+        _, user_id = _create_user(client)
+        _, habit_id = _create_habit(client, user_id)
+        resp = client.put(f"/api/users/{user_id}/habits/{habit_id}/", json={})
+        assert resp.status_code == 415
+
     def test_delete(self, client):
         """DELETE a habit and verify it is removed from the database."""
         _, user_id = _create_user(client)
@@ -285,6 +318,13 @@ class TestReminderCollection:
         resp = client.post(self._base_url(user_id, habit_id), data="not json")
         assert resp.status_code == 415
 
+    def test_post_empty_json(self, client):
+        """POST with empty JSON payload should be rejected as unsupported media type."""
+        _, user_id = _create_user(client)
+        _, habit_id = _create_habit(client, user_id)
+        resp = client.post(self._base_url(user_id, habit_id), json={})
+        assert resp.status_code == 415
+
 
 class TestReminderItem:
     """Tes functions for ReminderItem"""
@@ -328,6 +368,17 @@ class TestReminderItem:
         resp = client.put(
             f"/api/users/{user_id}/habits/{habit_id}/reminders/{reminder_id}/",
             data="not json")
+        assert resp.status_code == 415
+
+    def test_put_empty_json(self, client):
+        """PUT with empty JSON payload should be rejected as unsupported media type."""
+        _, user_id = _create_user(client)
+        _, habit_id = _create_habit(client, user_id)
+        reminder_id = self._create_reminder(client, user_id, habit_id)
+        resp = client.put(
+            f"/api/users/{user_id}/habits/{habit_id}/reminders/{reminder_id}/",
+            json={},
+        )
         assert resp.status_code == 415
 
     def test_delete(self, client):
@@ -396,6 +447,13 @@ class TestTrackingCollection:
         resp = client.post(self._base_url(user_id, habit_id), data="not json")
         assert resp.status_code == 415
 
+    def test_post_empty_json(self, client):
+        """POST with empty JSON payload should be rejected as unsupported media type."""
+        _, user_id = _create_user(client)
+        _, habit_id = _create_habit(client, user_id)
+        resp = client.post(self._base_url(user_id, habit_id), json={})
+        assert resp.status_code == 415
+
 
 class TestTrackingItem:
     """Tests for individual tracking logs."""
@@ -440,6 +498,17 @@ class TestTrackingItem:
             data="not json")
         assert resp.status_code == 415
 
+    def test_put_empty_json(self, client):
+        """PUT with empty JSON payload should be rejected as unsupported media type."""
+        _, user_id = _create_user(client)
+        _, habit_id = _create_habit(client, user_id)
+        tracking_id = self._create_tracking(client, user_id, habit_id)
+        resp = client.put(
+            f"/api/users/{user_id}/habits/{habit_id}/tracking/{tracking_id}/",
+            json={},
+        )
+        assert resp.status_code == 415
+
     def test_delete(self, client):
         """DELETE a tracking log and verify it is removed from the database."""
         _, user_id = _create_user(client)
@@ -468,3 +537,50 @@ class TestTrackingItem:
         other_user_id = User.query.filter_by(email="other@example.com").first().id
         resp = client.get(f"/api/users/{other_user_id}/habits/{habit_id}/tracking/{tracking_id}/")
         assert resp.status_code == 404
+
+
+class TestApiMetaAndOwnerGuards:
+    """Tests for API meta endpoint and resource owner helper guards."""
+
+    def test_api_entry_and_json_constant(self, client):
+        """GET API entry should return static metadata."""
+        resp = client.get("/api/")
+        assert resp.status_code == 200
+        assert resp.json == entry()
+        assert JSON == "application/json"
+
+    def test_owner_guard_helpers_raise_not_found_for_mismatch(self):
+        """Owner guard helper functions should raise NotFound for mismatched ownership."""
+        class Obj:
+            pass
+
+        user = Obj()
+        user.id = 1
+
+        habit = Obj()
+        habit.id = 10
+        habit.user_id = 2
+
+        with pytest.raises(NotFound):
+            _check_habit_owner(user, habit)
+
+        habit.user_id = 1
+        _check_habit_owner(user, habit)
+
+        reminder = Obj()
+        reminder.habit_id = 999
+
+        with pytest.raises(NotFound):
+            _check_reminder_owner(user, habit, reminder)
+
+        reminder.habit_id = habit.id
+        _check_reminder_owner(user, habit, reminder)
+
+        tracking = Obj()
+        tracking.habit_id = 123
+
+        with pytest.raises(NotFound):
+            _check_tracking_owner(user, habit, tracking)
+
+        tracking.habit_id = habit.id
+        _check_tracking_owner(user, habit, tracking)

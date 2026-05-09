@@ -1,38 +1,6 @@
-import tempfile
-import os
 from datetime import datetime, time, timedelta, UTC
-import pytest
-from habithub import db, create_app
+from habithub import db
 from habithub.models import User, Habit, Reminder, Tracking
-
-@pytest.fixture
-def db_handle():
-    """
-    Test file's fixture that creates a database and yields it
-    to the testing functions
-    """
-    db_fd, db_fname = tempfile.mkstemp()
-    config = {
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///" + db_fname,
-        "TESTING": True
-    }
-
-    app = create_app()
-
-    ctx = app.app_context()
-    ctx.push()
-
-    db.create_all()
-
-    yield db
-
-    db.session.rollback()
-    db.drop_all()
-    db.session.remove()
-    db.engine.dispose()
-    ctx.pop()
-    os.close(db_fd)
-    os.unlink(db_fname)
 
 def _get_user(first_name, last_name, email):
     return User(first_name=first_name, last_name=last_name, email=email)
