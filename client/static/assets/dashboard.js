@@ -2,6 +2,18 @@
 
 let habitChartInstance = null;
 
+/**
+ * Calculate dashboard tracking metrics from habit tracking logs.
+ *
+ * Input parameters:
+ * - logs: Array of tracking log resources from API.
+ *
+ * Output:
+ * - Returns object with done_today, days7, days30 and streak.
+ *
+ * Exceptions / failure handling:
+ * - Invalid timestamp values are ignored so dashboard does not fail.
+ */
 function summarizeTracking(logs) {
   const toLocalDayKey = (dateObj) => {
     const year = dateObj.getFullYear();
@@ -57,6 +69,19 @@ function summarizeTracking(logs) {
   };
 }
 
+/**
+ * Render dashboard summary cards.
+ *
+ * Input parameters:
+ * - doneCount: Number of habits done today.
+ * - total: Total number of habits.
+ * - activeCount: Number of active habits.
+ * - bestStreak: Biggest streak in current habits.
+ *
+ *
+ * Exceptions / failure handling:
+ * - This function should not fail in normal use.
+ */
 function renderStats(doneCount, total, activeCount, bestStreak) {
   const statsGrid = document.getElementById("statsGrid");
   statsGrid.innerHTML = `
@@ -75,6 +100,15 @@ function renderStats(doneCount, total, activeCount, bestStreak) {
   `;
 }
 
+/**
+ * Render dashboard habit table.
+ *
+ * Input parameters:
+ * - habits: Array of enriched habit objects for dashboard view.
+ *
+ * Exceptions / failure handling:
+ * - This function should not fail in normal use.
+ */
 function renderHabitsTable(habits) {
   const mount = document.getElementById("habitsTableMount");
   if (!habits.length) {
@@ -114,6 +148,13 @@ function renderHabitsTable(habits) {
   `;
 }
 
+/**
+ * Load one quote for dashboard header.
+ *
+ * Exceptions / failure handling:
+ * - Network or parse failure uses local default quote.
+ * - Quote data comes from external ZenQuotes API.
+ */
 async function loadQuote() {
   const quoteLine = document.getElementById("quoteLine");
   try {
@@ -126,6 +167,17 @@ async function loadQuote() {
   }
 }
 
+/**
+ * Render dashboard chart with only active habits.
+ *
+ * Input parameters:
+ * - habits: Array of enriched habit objects.
+ *
+ *
+ * Exceptions / failure handling:
+ * - This code expects Chart.js is already loaded in page.
+ * - Old chart instance is destroyed before new render.
+ */
 function renderChart(habits) {
   const activeHabits = habits.filter((habit) => habit.active);
   const labels = activeHabits.map((habit) => habit.name);
@@ -172,6 +224,16 @@ function renderChart(habits) {
   });
 }
 
+/**
+ * Render full dashboard view from current habit and metric data.
+ *
+ * Input parameters:
+ * - habits: Raw habit array from API.
+ * - enriched: Habit array with calculated dashboard metrics.
+ *
+ * Exceptions / failure handling:
+ * - If there is no active habits, chart is hidden and text message is shown.
+ */
 function renderDashboard(habits, enriched) {
   const doneCount = enriched.filter((entry) => entry.done_today).length;
   const activeCount = habits.filter((entry) => entry.active).length;
@@ -207,6 +269,16 @@ function renderDashboard(habits, enriched) {
   chartEmpty.textContent = "No active habits to chart.";
 }
 
+/**
+ * Create tracking log for one habit with current timestamp.
+ *
+ * Input parameters:
+ * - userId: Id of current logged user.
+ * - habitId: Id of habit to log.
+ *
+ * Exceptions / failure handling:
+ * - API request error is passed so caller can show flash message.
+ */
 async function logHabit(userId, habitId) {
   await HabitHub.apiRequest(`/users/${userId}/habits/${habitId}/tracking/`, {
     method: "POST",
@@ -214,6 +286,13 @@ async function logHabit(userId, habitId) {
   });
 }
 
+/**
+ * Initialize dashboard page and load all visible dashboard content.
+ *
+ * Exceptions / failure handling:
+ * - Protected page check uses HabitHub.requireUser and redirects if needed.
+ * - Dashboard load failures are caught and shown as flash message.
+ */
 async function initDashboard() {
   const user = HabitHub.requireUser();
   HabitHub.renderSidebar("dashboard");

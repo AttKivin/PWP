@@ -1,10 +1,41 @@
-/* Reminders page logic for a selected habit. */
+/*
+ * Reminder management page code for static HabitHub client.
+ *
+ * AI use and code origin:
+ * - AI used: GitHub Copilot with GPT-5.4.
+ * 
+ * - Prompt summary used for AI-assisted parts:
+ *   "Build client-side reminder management for a static frontend, including
+ *   loading habit id from query string and create, edit, delete reminder
+ *   actions."
+ * 
+ * - AI-assisted methods in this file: initReminders.
+ * 
+ * - Manual work in this file: adapting URL/query behavior to HabitHub pages,
+ *   handling reminder time fields, and matching API endpoints and messages.
+ */
 
+/**
+ * Read habit id from page query string.
+ *
+ * Output:
+ * - Returns habitId from query as string, or null if missing
+ */
 function getHabitIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
   return params.get("habitId");
 }
 
+/**
+ * Build reminder table HTML for selected habit.
+ *
+ * Input parameters:
+ * - reminders: Array of reminder resources from API.
+ * - habitId: Selected habit id from page query.
+ *
+ * Output:
+ * - Returns HTML string for reminder table or empty message.
+ */
 function renderReminderTable(reminders, habitId) {
   if (!reminders.length) {
     return '<p class="text-muted">No reminders yet. Add one above.</p>';
@@ -40,11 +71,30 @@ function renderReminderTable(reminders, habitId) {
   `;
 }
 
+/**
+ * Refresh reminders for selected habit and render table again.
+ *
+ * Input parameters:
+ * - userId: Id of current logged user.
+ * - habitId: Id of selected habit.
+ *
+ *
+ * Exceptions / failure handling:
+ * - API request errors are passed to caller so flash message can be shown.
+ */
 async function refreshReminders(userId, habitId) {
   const { data: reminders } = await HabitHub.apiRequest(`/users/${userId}/habits/${habitId}/reminders/`);
   document.getElementById("remindersMount").innerHTML = renderReminderTable(reminders || [], habitId);
 }
 
+/**
+ * Initialize reminders page and register CRUD handlers.
+ *
+ * Exceptions / failure handling:
+ * - Login protection is done by HabitHub.requireUser.
+ * - Missing query parameter and API failures are shown by flash message and
+ *   function returns early.
+ */
 async function initReminders() {
   const user = HabitHub.requireUser();
   HabitHub.renderSidebar("habits");
