@@ -43,12 +43,12 @@
 
 
 ## Meeting 4.
-* **DATE:**
-* **PARTICIPANTS:**
-* **TEACHER:**
+* **DATE:** 13/04/2026
+* **PARTICIPANTS:**Abdulmomen Ghalkha and Hatem ElKharashy
+* **TEACHER:** Ivan Sanchez
 
 ### Action points
-*List here the actions points discussed with assistants*
+* Fix apidocs for CRUD methods
 
 ### Notes
 *Add here notes that you consider important. This is not mandatory*
