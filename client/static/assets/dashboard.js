@@ -1,18 +1,14 @@
-/* Dashboard page logic: stats, table, chart, and quick logging. */
+/*
+ * Dashboard: stats cards, habits table, chart, quick logging.
+ * Most from AI. summarizeTracking has my bug fixes. renderChart filters to active only.
+ * initDashboard removed caching, optimized with Promise.all() for active habits.
+ */
 
 let habitChartInstance = null;
 
 /**
- * Calculate dashboard tracking metrics from habit tracking logs.
- *
- * Input parameters:
- * - logs: Array of tracking log resources from API.
- *
- * Output:
- * - Returns object with done_today, days7, days30 and streak.
- *
- * Exceptions / failure handling:
- * - Invalid timestamp values are ignored so dashboard does not fail.
+ * Parse tracking logs and calc metrics: done_today, days7, days30, streak.
+ * Fixed the done_today bug and improved date math.
  */
 function summarizeTracking(logs) {
   const toLocalDayKey = (dateObj) => {
@@ -77,10 +73,6 @@ function summarizeTracking(logs) {
  * - total: Total number of habits.
  * - activeCount: Number of active habits.
  * - bestStreak: Biggest streak in current habits.
- *
- *
- * Exceptions / failure handling:
- * - This function should not fail in normal use.
  */
 function renderStats(doneCount, total, activeCount, bestStreak) {
   const statsGrid = document.getElementById("statsGrid");
@@ -105,9 +97,6 @@ function renderStats(doneCount, total, activeCount, bestStreak) {
  *
  * Input parameters:
  * - habits: Array of enriched habit objects for dashboard view.
- *
- * Exceptions / failure handling:
- * - This function should not fail in normal use.
  */
 function renderHabitsTable(habits) {
   const mount = document.getElementById("habitsTableMount");
@@ -168,15 +157,7 @@ async function loadQuote() {
 }
 
 /**
- * Render dashboard chart with only active habits.
- *
- * Input parameters:
- * - habits: Array of enriched habit objects.
- *
- *
- * Exceptions / failure handling:
- * - This code expects Chart.js is already loaded in page.
- * - Old chart instance is destroyed before new render.
+ * Render chart for active habits only.
  */
 function renderChart(habits) {
   const activeHabits = habits.filter((habit) => habit.active);
@@ -287,11 +268,8 @@ async function logHabit(userId, habitId) {
 }
 
 /**
- * Initialize dashboard page and load all visible dashboard content.
- *
- * Exceptions / failure handling:
- * - Protected page check uses HabitHub.requireUser and redirects if needed.
- * - Dashboard load failures are caught and shown as flash message.
+ * Load dashboard. Fetch only active habits, parallel requests with Promise.all().
+ * No caching - always fresh. Much faster.
  */
 async function initDashboard() {
   const user = HabitHub.requireUser();

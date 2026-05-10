@@ -1,46 +1,20 @@
 /*
- * Shared helper code for static HabitHub client.
- *
- * AI use and code origin:
- * - AI used: GitHub Copilot with GPT-5.4.
- * 
- * - Prompt summary used for AI-assisted parts:
- *   "Create shared client utilities for a static HabitHub frontend with API
- *   request helper, localStorage user session handling, flash messages when needed, and
- *   sidebar rendering. Make sure API request helper works with a proxy and that user 
- *   session is handled correctly."
- * 
- * - AI-assisted methods in this file: apiRequest, renderSidebar, showMessage
- * 
- * - Manual work in this file: adapting request flow to HabitHub proxy,
- *   matching sidebar links to this project pages, and adjusting messages and
- *   storage keys.
+ * Shared client utilities. API requests, localStorage session, messages, sidebar.
+ * getApiKey, getCurrentUser, setCurrentUser, clearCurrentUser, requireUser, formatDate: me
+ * apiRequest, renderSidebar, showMessage: AI scaffold, tweaked by me
  */
 
 const DEFAULT_API_KEY = "aleem";
 
 /**
- * Get API key for proxied API request.
- *
- * Output:
- * - Returns API key string for X-API-KEY header.
- *
- * Exceptions / failure handling:
- * - This function should not fail in normal case.
+ * Get API key string for X-API-KEY header.
  */
 function getApiKey() {
   return DEFAULT_API_KEY;
 }
 
 /**
- * Read logged user object from browser local storage.
- *
- * Output:
- * - Returns parsed user object if it exists.
- * - Returns null if user is missing or saved JSON is broken.
- *
- * Exceptions / failure handling:
- * - JSON parse error is caught and function returns null.
+ * Get logged user from local storage. Returns null if missing or broken.
  */
 function getCurrentUser() {
   const raw = localStorage.getItem("habithubUser");
@@ -55,41 +29,21 @@ function getCurrentUser() {
 }
 
 /**
- * Save logged user object to browser local storage.
- *
- * Input parameters:
- * - user: User object from HabitHub API.
- *
- * Output:
- * - No return value.
- *
- * Exceptions / failure handling:
- * - If browser storage is blocked, runtime error can happen.
+ * Save user to local storage.
  */
 function setCurrentUser(user) {
   localStorage.setItem("habithubUser", JSON.stringify(user));
 }
 
 /**
- * Remove logged user object from browser local storage.
- * 
- *
- * Exceptions / failure handling:
- * - If browser storage is blocked, runtime error can happen.
+ * Clear user from local storage.
  */
 function clearCurrentUser() {
   localStorage.removeItem("habithubUser");
 }
 
 /**
- * Check that protected page has logged user.
- * 
- *
- * Output:
- * - Returns current user object if login data exists.
- *
- * Exceptions / failure handling:
- * - If user is missing, page goes to login and function throws Error.
+ * Check if user is logged in. Redirect to login if not.
  */
 function requireUser() {
   const user = getCurrentUser();
@@ -101,14 +55,7 @@ function requireUser() {
 }
 
 /**
- * Show temporary message in page.
- *
- * Input parameters:
- * - text: Message text for user.
- * - type: Message style like info, success, warning or danger.
- *
- * Exceptions / failure handling:
- * - If page has no flash container, function just ends.
+ * Show a flash message. Type: info, success, warning, danger.
  */
 function showMessage(text, type = "info") {
   const wrap = document.getElementById("flashWrap");
@@ -128,18 +75,7 @@ function showMessage(text, type = "info") {
 }
 
 /**
- * Send HTTP request to proxied HabitHub API.
- *
- * Input parameters:
- * - path: API path after /api, for example /users/.
- * - options: Optional request data with method and JSON body.
- *
- * Output:
- * - Returns object with parsed response data and maybe Location header.
- *
- * Exceptions / failure handling:
- * - Throws Error if HTTP response is not successful.
- * - Reads JSON or text error body and makes readable message from it.
+ * Send HTTP request to /api. Returns data and Location header.
  */
 async function apiRequest(path, options = {}) {
   const { method = "GET", body = null } = options;
@@ -186,14 +122,7 @@ async function apiRequest(path, options = {}) {
 }
 
 /**
- * Render shared sidebar for pages after login.
- *
- * Input parameters:
- * - activePage: Name of page which is active now.
- *
- * Exceptions / failure handling:
- * - If user is missing, page goes to login.
- * - If sidebar mount is missing, function just ends.
+ * Render sidebar with nav links and user info.
  */
 function renderSidebar(activePage) {
   const mount = document.getElementById("sidebarMount");
@@ -219,7 +148,7 @@ function renderSidebar(activePage) {
       </nav>
       <div class="sidebar-footer">
         <div class="sidebar-user">${user.first_name || ""} ${user.last_name || ""}</div>
-        <a href="#" id="switchUserBtn">Switch user</a>
+        <a href="#" id="switchUserBtn">Log out</a>
       </div>
     </div>
   `;
@@ -235,18 +164,7 @@ function renderSidebar(activePage) {
 }
 
 /**
- * Change ISO-like date string to short YYYY-MM-DD text.
- *
- * Input parameters:
- * - isoLike: Date-time string or similar value from API.
- *
- * Output:
- * - Returns short YYYY-MM-DD string.
- * - Returns "-" if value is missing.
- *
- * Exceptions / failure handling:
- * - Full date validation is not done here. Function only cuts string because
- *   API already gives ISO-like timestamp.
+ * Extract YYYY-MM-DD from ISO timestamp. Return "-" if missing.
  */
 function formatDate(isoLike) {
   if (!isoLike) {

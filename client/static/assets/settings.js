@@ -1,24 +1,22 @@
 /*
  * Settings and account management code for static HabitHub client.
  *
- * AI use and code origin:
- * - AI used: GitHub Copilot with GPT-5.4.
- * 
- * - Prompt summary used for AI-assisted parts:
- *   "Create client-side settings page logic for profile updates and account
- *   deletion in a static frontend that talks to a REST API."
- * 
- * - AI-assisted methods in this file: deleteAccountTree and initSettings.
- * 
- * - Manual work in this file: matching delete order to HabitHub data model,
- *   updating local user state after profile edits, and tuning messages and
- *   confirmation flow.
- * - REST and resource-handling ideas learned from course material are not
- *   marked here as AI.
+ * Code origin:
+ * - loadProfile(): AI scaffold (Copilot GPT-5.4).
+ * - deleteAccountTree(): AI scaffold structure, USER IMPLEMENTED the correct cascading
+ *   delete order based on HabitHub data model: reminders → tracking logs → habits → user.
+ *   This order ensures foreign key constraints are satisfied during deletion.
+ * - initSettings(): AI scaffold with user adaptations for form wiring and session state updates.
+ *
+ * Prompt reference: "Create client-side settings page logic for profile updates and account
+ * deletion in a static frontend that talks to a REST API."
+ *
+ * Note: REST and resource-handling patterns from course material are foundational;
+ * user adaptations focus on HabitHub-specific data model requirements.
  */
 
 /**
- * Load current user profile from API.
+ * AI-SCAFFOLD: Load current user profile from API.
  *
  * Input parameters:
  * - userId: Id of current logged user.
@@ -35,10 +33,18 @@ async function loadProfile(userId) {
 }
 
 /**
- * Delete user reminders, tracking logs, habits and in last the user.
+ * AI-SCAFFOLD (user-implemented cascade order): Delete user reminders, tracking logs, habits and user.
  *
  * Input parameters:
  * - userId: Id of current logged user.
+ *
+ * USER IMPLEMENTATION:
+ * Correct cascading delete order based on HabitHub data model constraints:
+ * 1. Delete all reminders for each habit (references habit)
+ * 2. Delete all tracking logs for each habit (references habit)
+ * 3. Delete all habits (references user)
+ * 4. Delete user account
+ * This order ensures foreign key constraints are satisfied at each deletion step.
  *
  * Exceptions / failure handling:
  * - API request errors are passed if some delete step fails.
@@ -73,7 +79,16 @@ async function deleteAccountTree(userId) {
 }
 
 /**
- * Initialize settings page and connect profile/account actions.
+ * AI-SCAFFOLD (adapted): Initialize settings page and connect profile/account actions.
+ *
+ * Implementation:
+ * - Loads current user profile into form fields
+ * - Wires profile update form submission with PUT request
+ * - Updates local session after profile changes
+ * - Wires account delete button with confirmation and cascading delete
+ * - Error handling for all operations
+ *
+ * User adaptations: Session state updates after profile edit, delete order management.
  *
  * Exceptions / failure handling:
  * - Protected page check uses HabitHub.requireUser and redirects if needed.

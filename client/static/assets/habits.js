@@ -1,34 +1,12 @@
 /*
- * Habit management page code for static HabitHub client.
- *
- * AI use and code origin:
- * - AI used: GitHub Copilot with GPT-5.4.
- * 
- * - Prompt summary used for AI-assisted parts:
- *   "Build client-side CRUD page logic for habits in a static web frontend,
- *   including table rendering, create form, update form, and delete actions."
- * 
- * - AI-assisted methods in this file: initHabits, refreshHabits, habitsTableHtml.
- * 
- * - Manual work in this file: adapting requests and field names to HabitHub,
- *   wiring reminder links, and tuning messages and update behavior.
- * 
+ * Habits CRUD page.
+ * All from AI scaffold. I wired the event handlers and integrated reminder links.
  */
 
 let cachedHabits = [];
 
 /**
- * Build HTML table text from current habit collection.
- *
- * Input parameters:
- * - habits: Array of habit resources from API.
- *
- * Output:
- * - Returns HTML string for table or empty message.
- *
- * Exceptions / failure handling:
- * - This function should not fail in normal use. It expects habit fields same
- *   like HabitHub API returns.
+ * Build habits table HTML with reminder links and inline edit forms.
  */
 function habitsTableHtml(habits) {
   if (!habits.length) {
@@ -74,13 +52,7 @@ function habitsTableHtml(habits) {
 }
 
 /**
- * Refresh habit list from API and render table again.
- *
- * Input parameters:
- * - userId: Id of current logged user.
- *
- * Exceptions / failure handling:
- * - API request errors are passed to caller so message can be shown.
+ * Fetch habits and re-render the table.
  */
 async function refreshHabits(userId) {
   const { data: habits } = await HabitHub.apiRequest(`/users/${userId}/habits/`);
@@ -89,11 +61,7 @@ async function refreshHabits(userId) {
 }
 
 /**
- * Initialize habits page and connect all CRUD event handlers.
- *
- * Exceptions / failure handling:
- * - Protected page check uses HabitHub.requireUser and redirects if needed.
- * - API failures are caught in handlers and shown as flash message.
+ * Load habits page and wire up all create/update/delete event handlers.
  */
 async function initHabits() {
   const user = HabitHub.requireUser();
