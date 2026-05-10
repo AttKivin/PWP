@@ -1,38 +1,7 @@
-/*
- * Dashboard page code for static HabitHub client.
- *
- * AI use and code origin:
- * - AI used: GitHub Copilot with GPT-5.4.
- * 
- * - Prompt summary used for AI-assisted parts:
- *   "Create client-side dashboard logic for a static habit tracker frontend,
- *   including progress metrics, chart rendering, tracking summaries, caching,
- *   and quick log actions."
- * 
- * - AI-assisted methods in this file: summarizeTracking, readDashboardCache,
- *   writeDashboardCache, renderChart, renderDashboard, initDashboard.
- * 
- * - Manual work in this file: fixing done_today status bug, excluding inactive
- *   habits from chart, improving dashboard speed, tuning cache behavior, and
- *   adapting all logic to HabitHub responses and page structure.
- */
+/* Dashboard page logic: stats, table, chart, and quick logging. */
 
-const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
-const DASHBOARD_CACHE_PREFIX = "habithubDashboardCache:";
 let habitChartInstance = null;
 
-/**
- * Calculate dashboard tracking metrics from habit tracking logs.
- *
- * Input parameters:
- * - logs: Array of tracking log resources from API.
- *
- * Output:
- * - Returns object with done_today, days7, days30 and streak.
- *
- * Exceptions / failure handling:
- * - Invalid timestamp values are ignored so dashboard does not fail.
- */
 function summarizeTracking(logs) {
   const toLocalDayKey = (dateObj) => {
     const year = dateObj.getFullYear();
@@ -88,114 +57,6 @@ function summarizeTracking(logs) {
   };
 }
 
-/**
- * Build sessionStorage cache key for one user dashboard snapshot.
- *
- * Input parameters:
- * - userId: Id of current logged user.
- *
- * Output:
- * - Returns cache key string.
- *
- * Exceptions / failure handling:
- * - This function should not fail in normal use.
- */
-function dashboardCacheKey(userId) {
-  return `${DASHBOARD_CACHE_PREFIX}${userId}`;
-}
-
-/**
- * Read cached dashboard snapshot from sessionStorage.
- *
- * Input parameters:
- * - userId: Id of current logged user.
- *
- * Output:
- * - Returns cached enriched habit array if cache is valid.
- * - Returns null if cache is missing, old or malformed.
- *
- * Exceptions / failure handling:
- * - JSON parse errors are caught and function returns null.
- */
-function readDashboardCache(userId) {
-  const raw = sessionStorage.getItem(dashboardCacheKey(userId));
-  if (!raw) {
-    return null;
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed.timestamp || !Array.isArray(parsed.enriched)) {
-      return null;
-    }
-    if (Date.now() - parsed.timestamp > DASHBOARD_CACHE_TTL_MS) {
-      return null;
-    }
-    return parsed.enriched;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Save enriched dashboard snapshot to sessionStorage.
- *
- * Input parameters:
- * - userId: Id of current logged user.
- * - enriched: Array of habits with calculated dashboard metrics.
-
- * Exceptions / failure handling:
- * - If browser storage is blocked, runtime error can happen.
- */
-function writeDashboardCache(userId, enriched) {
-  sessionStorage.setItem(
-    dashboardCacheKey(userId),
-    JSON.stringify({
-      timestamp: Date.now(),
-      enriched,
-    }),
-  );
-}
-
-/**
- * Check if cached dashboard snapshot matches current habit list.
- *
- * Input parameters:
- * - habits: Fresh habit array from API.
- * - enriched: Cached enriched habit array.
- *
- * Output:
- * - Returns true if both sets have same habit ids.
- * - Returns false in other case.
- *
- * Exceptions / failure handling:
- * - This function should not fail in normal use.
- */
-function sameHabitSet(habits, enriched) {
-  if (habits.length !== enriched.length) {
-    return false;
-  }
-  const ids = new Set(habits.map((habit) => habit.id));
-  for (const item of enriched) {
-    if (!ids.has(item.id)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Render dashboard summary cards.
- *
- * Input parameters:
- * - doneCount: Number of habits done today.
- * - total: Total number of habits.
- * - activeCount: Number of active habits.
- * - bestStreak: Biggest streak in current habits.
- *
- *
- * Exceptions / failure handling:
- * - This function should not fail in normal use.
- */
 function renderStats(doneCount, total, activeCount, bestStreak) {
   const statsGrid = document.getElementById("statsGrid");
   statsGrid.innerHTML = `
@@ -214,15 +75,6 @@ function renderStats(doneCount, total, activeCount, bestStreak) {
   `;
 }
 
-/**
- * Render dashboard habit table.
- *
- * Input parameters:
- * - habits: Array of enriched habit objects for dashboard view.
- *
- * Exceptions / failure handling:
- * - This function should not fail in normal use.
- */
 function renderHabitsTable(habits) {
   const mount = document.getElementById("habitsTableMount");
   if (!habits.length) {
@@ -262,13 +114,6 @@ function renderHabitsTable(habits) {
   `;
 }
 
-/**
- * Load one quote for dashboard header.
- *
- * Exceptions / failure handling:
- * - Network or parse failure uses local default quote.
- * - Quote data comes from external ZenQuotes API.
- */
 async function loadQuote() {
   const quoteLine = document.getElementById("quoteLine");
   try {
@@ -281,17 +126,6 @@ async function loadQuote() {
   }
 }
 
-/**
- * Render dashboard chart with only active habits.
- *
- * Input parameters:
- * - habits: Array of enriched habit objects.
- *
- *
- * Exceptions / failure handling:
- * - This code expects Chart.js is already loaded in page.
- * - Old chart instance is destroyed before new render.
- */
 function renderChart(habits) {
   const activeHabits = habits.filter((habit) => habit.active);
   const labels = activeHabits.map((habit) => habit.name);
@@ -338,16 +172,6 @@ function renderChart(habits) {
   });
 }
 
-/**
- * Render full dashboard view from current habit and metric data.
- *
- * Input parameters:
- * - habits: Raw habit array from API.
- * - enriched: Habit array with calculated dashboard metrics.
- *
- * Exceptions / failure handling:
- * - If there is no active habits, chart is hidden and text message is shown.
- */
 function renderDashboard(habits, enriched) {
   const doneCount = enriched.filter((entry) => entry.done_today).length;
   const activeCount = habits.filter((entry) => entry.active).length;
@@ -383,16 +207,6 @@ function renderDashboard(habits, enriched) {
   chartEmpty.textContent = "No active habits to chart.";
 }
 
-/**
- * Create tracking log for one habit with current timestamp.
- *
- * Input parameters:
- * - userId: Id of current logged user.
- * - habitId: Id of habit to log.
- *
- * Exceptions / failure handling:
- * - API request error is passed so caller can show flash message.
- */
 async function logHabit(userId, habitId) {
   await HabitHub.apiRequest(`/users/${userId}/habits/${habitId}/tracking/`, {
     method: "POST",
@@ -400,15 +214,6 @@ async function logHabit(userId, habitId) {
   });
 }
 
-/**
- * Initialize dashboard page and load all visible dashboard content.
- *
- * Exceptions / failure handling:
- * - Protected page check uses HabitHub.requireUser and redirects if needed.
- * - Dashboard load failures are caught and shown as flash message.
- * - Cached data can be rendered first so page feels faster before fresh data
- *   comes.
- */
 async function initDashboard() {
   const user = HabitHub.requireUser();
   HabitHub.renderSidebar("dashboard");
@@ -423,10 +228,6 @@ async function initDashboard() {
   try {
     const { data: habitsRaw } = await HabitHub.apiRequest(`/users/${user.id}/habits/`);
     const habits = habitsRaw || [];
-    const cachedEnriched = readDashboardCache(user.id);
-    if (cachedEnriched && sameHabitSet(habits, cachedEnriched)) {
-      renderDashboard(habits, cachedEnriched);
-    }
 
     const activeHabits = habits.filter((habit) => habit.active);
     const activeMetrics = await Promise.all(
@@ -450,7 +251,6 @@ async function initDashboard() {
       return { ...habit, ...metrics };
     });
 
-    writeDashboardCache(user.id, enriched);
     renderDashboard(habits, enriched);
 
     document.getElementById("habitsTableMount").addEventListener("click", async (event) => {

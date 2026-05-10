@@ -1,32 +1,6 @@
-/*
- * Login and account creation code for static HabitHub client.
- *
- * AI use and code origin:
- * - AI used: GitHub Copilot with GPT-5.4.
- * 
- * - Prompt summary used for AI-assisted parts:
- *   "Create client-side login and registration logic for a static frontend
- *   that works with a REST API, stores the logged user locally, and redirects
- *   after success."
- * 
- * - AI-assisted methods in this file: createAccount.
- * 
- * - Manual work in this file: matching sign-in to HabitHub email flow,
- *   following Location header format from this API, and simplifying login page
- *   after removing developer-only API key input.
- */
+/* Login and registration page logic. */
 
 
-/**
- * Sign in user by finding email from user collection.
- *
- * Input parameters:
- * - email: Email address written in login form.
- *
- * Exceptions / failure handling:
- * - Throws Error if matching account is not found.
- * - Can also pass API request error from HabitHub.apiRequest.
- */
 async function signInByEmail(email) {
   const { data: users } = await HabitHub.apiRequest("/users/");
   const normalized = email.trim().toLowerCase();
@@ -38,18 +12,6 @@ async function signInByEmail(email) {
   window.location.href = "/dashboard.html";
 }
 
-/**
- * Create new user account with HabitHub API.
- *
- * Input parameters:
- * - payload: Object with first_name, last_name and email.
- *
- *
- * Exceptions / failure handling:
- * - Can pass API request errors from create request or follow-up fetch.
- * - If Location follow-up does not give user object, code tries sign in by
- *   email as fallback.
- */
 async function createAccount(payload) {
   const { location } = await HabitHub.apiRequest("/users/", {
     method: "POST",
@@ -74,13 +36,6 @@ async function createAccount(payload) {
   window.location.href = "/dashboard.html";
 }
 
-/**
- * Add event handlers for login and create account forms.
- *
- * Exceptions / failure handling:
- * - If user already exists in local storage, page goes direct to dashboard.
- * - Form submit errors are caught and shown as flash message.
- */
 function initLoginPage() {
   if (HabitHub.getCurrentUser()) {
     window.location.href = "/dashboard.html";
