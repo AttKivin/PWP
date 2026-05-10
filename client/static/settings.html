@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    This HTML page was fully created with AI help.
+
+    AI used: GitHub Copilot with GPT-5.4.
+    Prompt summary:
+    "Create a static settings page for HabitHub with profile form and danger
+    zone section."
+
+    Manual changes after AI generation:
+    - Small content adjustments were made for final project use.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings - HabitHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<div id="flashWrap" class="flash-wrap"></div>
+<div id="sidebarMount"></div>
+<div class="main-content">
+  <div class="page-hd">
+    <h2>Settings</h2>
+    <p>Manage your account</p>
+  </div>
+
+  <div class="card" style="max-width:480px;">
+    <div class="card-hd">Profile</div>
+    <form id="profileForm">
+      <div class="form-field" style="margin-bottom:12px;">
+        <label class="field-label">First name</label>
+        <input name="first_name" required>
+      </div>
+      <div class="form-field" style="margin-bottom:12px;">
+        <label class="field-label">Last name</label>
+        <input name="last_name" required>
+      </div>
+      <div class="form-field" style="margin-bottom:18px;">
+        <label class="field-label">Email</label>
+        <input type="email" name="email" required>
+      </div>
+      <button type="submit">Save profile</button>
+    </form>
+  </div>
+
+  <div class="card" style="max-width:480px; border-color:#fecaca;">
+    <div class="card-hd" style="color: var(--danger);">Danger Zone</div>
+    <p class="text-muted" style="margin-bottom:14px;font-size:0.875rem;">Permanently delete your account and all associated data.</p>
+    <button id="deleteUserBtn" class="btn-danger">Delete my account</button>
+  </div>
+
+  <footer>HabitHub Client</footer>
+</div>
+<script src="/assets/common.js"></script>
+<script src="/assets/settings.js"></script>
+</body>
+</html>

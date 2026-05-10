@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    This HTML page was fully created with AI help.
+
+    AI used: GitHub Copilot with GPT-5.4.
+    Prompt summary:
+    "Create a static reminders page for HabitHub with back link, add form, and
+    table area for reminder editing."
+
+    Manual changes after AI generation:
+    - Small wording and layout adjustments were made for final project use.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reminders - HabitHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<div id="flashWrap" class="flash-wrap"></div>
+<div id="sidebarMount"></div>
+<div class="main-content">
+  <a href="/habits.html" class="back-link">&larr; Back to Habits</a>
+
+  <div class="page-hd">
+    <h2>Reminders</h2>
+    <p id="habitName">Loading habit...</p>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">Add Reminder</div>
+    <form id="addReminderForm" class="form-row">
+      <div class="form-field">
+        <label class="field-label">Time (HH:MM)</label>
+        <input type="time" name="reminded_time" required>
+      </div>
+      <button type="submit">Add reminder</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">Reminders</div>
+    <div id="remindersMount"></div>
+  </div>
+
+  <footer>HabitHub Client</footer>
+</div>
+<script src="/assets/common.js"></script>
+<script src="/assets/reminders.js"></script>
+</body>
+</html>

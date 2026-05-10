@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    This HTML page was fully created with AI help.
+
+    AI used: GitHub Copilot with GPT-5.4.
+    Prompt summary:
+    "Create a static login/register page for HabitHub with two cards and a clean
+    modern layout."
+
+    Manual changes after AI generation:
+    - Removed developer API key UI and adjusted text for the final project.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in - HabitHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<div id="flashWrap" class="flash-wrap"></div>
+<div class="auth-page">
+  <div class="auth-brand">
+    <h1>HabitHub</h1>
+    <p>Track your habits, build better routines</p>
+  </div>
+
+  <div class="auth-cards">
+    <div class="auth-card">
+      <h3>Sign in</h3>
+      <p>Enter your email to continue.</p>
+      <form id="signInForm">
+        <div class="auth-field">
+          <label>Email address</label>
+          <input type="email" name="email" required placeholder="name@example.com" autofocus>
+        </div>
+        <button type="submit" class="auth-btn">Sign in &rarr;</button>
+      </form>
+    </div>
+
+    <div class="auth-card">
+      <h3>Create account</h3>
+      <p>New here? Start tracking habits today.</p>
+      <form id="createForm">
+        <div class="auth-field">
+          <label>First name</label>
+          <input name="first_name" required>
+        </div>
+        <div class="auth-field">
+          <label>Last name</label>
+          <input name="last_name" required>
+        </div>
+        <div class="auth-field">
+          <label>Email address</label>
+          <input type="email" name="email" required placeholder="name@example.com">
+        </div>
+        <button type="submit" class="auth-btn">Create account &rarr;</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="/assets/common.js"></script>
+<script src="/assets/login.js"></script>
+</body>
+</html>

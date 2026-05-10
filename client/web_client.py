@@ -1,34 +1,84 @@
-"""Flask web client entrypoint for HabitHub.
-
-Implements a hypermedia client for the HabitHub API following patterns from:
-https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/exercise-4-implementing-hypermedia-clients/
-
-Usage:
-    python web_client.py [--api-url URL] [--api-key KEY] [--port PORT]
-
-Split architecture:
-- webapp/api_client.py: HTTP helpers and API error handling.
-- webapp/auth.py: login/register/logout and session decorator.
-- webapp/routes_habits.py: dashboard, tracking, habits, reminders.
-- webapp/routes_settings.py: settings profile and account deletion flow.
-- webapp/helpers.py: form parsing and analytics helpers.
-- webapp/core.py: Flask app object and runtime API config.
-
-AI-Generated Components (ChatGPT 5.4):
-- Initial Flask app scaffolding and route structure.
-- Jinja template skeleton (base.html, login.html, dashboard.html, etc.).
-- Habit/reminder/tracking CRUD form layouts.
-"""
+"""Static HabitHub web client entrypoint"""
 
 import argparse
+from pathlib import Path
 import webbrowser
 from threading import Timer
 
-from webapp import app, set_api_config
+import requests
+from flask import Flask, Response, request, send_from_directory
+
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="")
+API_URL = "http://localhost:5000"
+API_KEY = "aleem"
+
+
+def set_api_config(api_url: str, api_key: str) -> None:
+    """Set runtime configuration for the proxied API endpoint and API key."""
+    global API_URL, API_KEY
+    API_URL = api_url.rstrip("/")
+    API_KEY = api_key
+
+
+def _proxy_headers() -> dict:
+    """Build upstream headers for the proxied request."""
+    headers = {
+        "X-API-KEY": request.headers.get("X-API-KEY", API_KEY),
+    }
+    if request.headers.get("Content-Type"):
+        headers["Content-Type"] = request.headers["Content-Type"]
+    if request.headers.get("Accept"):
+        headers["Accept"] = request.headers["Accept"]
+    return headers
+
+
+@app.route("/api/", defaults={"path": ""}, methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@app.route("/api/<path:path>", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+def proxy_api(path: str):
+    """Forward API traffic to the configured backend server."""
+    base = f"{API_URL}/api"
+    target = f"{base}/{path}" if path else f"{base}/"
+    try:
+        upstream = requests.request(
+            method=request.method,
+            url=target,
+            params=request.args,
+            data=request.get_data() if request.method in {"POST", "PUT", "PATCH"} else None,
+            headers=_proxy_headers(),
+            timeout=10,
+            allow_redirects=False,
+        )
+    except requests.RequestException:
+        return Response(
+            '{"message":"Cannot reach HabitHub API server."}',
+            status=502,
+            mimetype="application/json",
+        )
+
+    excluded = {"content-encoding", "content-length", "transfer-encoding", "connection"}
+    response_headers = [(k, v) for k, v in upstream.headers.items() if k.lower() not in excluded]
+    return Response(upstream.content, status=upstream.status_code, headers=response_headers)
+
+
+@app.route("/")
+def root():
+    """Serve the static login page as the default entrypoint."""
+    return send_from_directory(str(STATIC_DIR), "login.html")
+
+
+@app.route("/<path:path>")
+def serve_static(path: str):
+    """Serve static client assets and pages."""
+    file_path = STATIC_DIR / path
+    if file_path.exists() and file_path.is_file():
+        return send_from_directory(str(STATIC_DIR), path)
+    return send_from_directory(str(STATIC_DIR), "login.html")
 
 
 def main() -> None:
-    """Parse CLI arguments, optionally open the browser, and start the server."""
+    """Parse CLI arguments, open browser, and run static client server."""
     parser = argparse.ArgumentParser(
         description="HabitHub Web Client",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

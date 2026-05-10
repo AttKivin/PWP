@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    This HTML page was fully created with AI help.
+
+    AI used: GitHub Copilot with GPT-5.4.
+    Prompt summary:
+    "Create a static habits management page for HabitHub with add form and table
+    area for CRUD actions."
+
+    Manual changes after AI generation:
+    - Small text and structure updates were made for final project use.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Habits - HabitHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<div id="flashWrap" class="flash-wrap"></div>
+<div id="sidebarMount"></div>
+<div class="main-content">
+  <div class="page-hd">
+    <h2>Habits</h2>
+    <p>Manage your habits and reminders</p>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">Add Habit</div>
+    <form id="addHabitForm" class="form-row">
+      <div class="form-field">
+        <label class="field-label">Habit name</label>
+        <input name="name" required placeholder="e.g. Morning run">
+      </div>
+      <button type="submit">Add habit</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">Your Habits</div>
+    <div id="habitsMount"></div>
+  </div>
+
+  <footer>HabitHub Client</footer>
+</div>
+<script src="/assets/common.js"></script>
+<script src="/assets/habits.js"></script>
+</body>
+</html>

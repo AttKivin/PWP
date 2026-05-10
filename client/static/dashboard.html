@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    This HTML page was fully created with AI help.
+
+    AI used: GitHub Copilot with GPT-5.4.
+    Prompt summary:
+    "Create a static dashboard page for HabitHub with summary cards, chart area,
+    table area, and simple modern structure."
+
+    Manual changes after AI generation:
+    - Small content changes were made to match final dashboard behavior.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - HabitHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<div id="flashWrap" class="flash-wrap"></div>
+<div id="sidebarMount"></div>
+<div class="main-content">
+  <div class="page-hd">
+    <h2>Dashboard</h2>
+    <p id="todayLine"></p>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--accent);padding:16px 20px;background:linear-gradient(135deg,#fafbff 0%,#f5f3ff 100%);">
+    <p id="quoteLine" style="font-style:italic;color:var(--muted);font-size:0.9rem;line-height:1.6;">Loading quote...</p>
+  </div>
+
+  <div class="stat-grid" id="statsGrid"></div>
+
+  <div class="card">
+    <div class="card-hd">Completion Rate</div>
+    <canvas id="habitChart" style="max-height: 240px;"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">Today's Habits</div>
+    <div id="habitsTableMount"></div>
+  </div>
+
+  <footer>HabitHub Client - Quote source: <a href="https://zenquotes.io/" target="_blank" rel="noopener noreferrer">ZenQuotes</a></footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/assets/common.js"></script>
+<script src="/assets/dashboard.js"></script>
+</body>
+</html>
