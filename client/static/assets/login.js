@@ -76,7 +76,6 @@ function initLoginPage() {
       HabitHub.showMessage(error.message, "danger");
     }
   });
-
 }
 
 document.addEventListener("DOMContentLoaded", initLoginPage);

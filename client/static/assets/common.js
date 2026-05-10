@@ -1,4 +1,4 @@
-/* Shared helpers used by all client pages. */
+/* Shared helpers used by all pages. */
 
 const DEFAULT_API_KEY = "aleem";
 
@@ -52,16 +52,15 @@ function showMessage(text, type = "info") {
   }, 4500);
 }
 
-async function readApiError(response) {
+async function readErrorMessage(response) {
   let message = `API error ${response.status}`;
-
   try {
     const payload = await response.json();
     if (payload?.message) {
       return `${message}: ${payload.message}`;
     }
   } catch {
-    // Try plain text next.
+    // Ignore JSON parse failure.
   }
 
   try {
@@ -70,13 +69,12 @@ async function readApiError(response) {
       message = `${message}: ${text}`;
     }
   } catch {
-    // Keep default message.
+    // Keep fallback message.
   }
 
   return message;
 }
 
-// Wrapper for all client calls to /api.
 async function apiRequest(path, options = {}) {
   const { method = "GET", body = null } = options;
   const headers = {
@@ -93,7 +91,7 @@ async function apiRequest(path, options = {}) {
   });
 
   if (!response.ok) {
-    const message = await readApiError(response);
+    const message = await readErrorMessage(response);
     throw new Error(message);
   }
 

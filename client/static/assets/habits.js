@@ -1,6 +1,6 @@
 /* Habits page logic (list, create, edit, delete). */
 
-let cachedHabits = [];
+let currentHabits = [];
 
 function habitsTableHtml(habits) {
   if (!habits.length) {
@@ -47,8 +47,8 @@ function habitsTableHtml(habits) {
 
 async function refreshHabits(userId) {
   const { data: habits } = await HabitHub.apiRequest(`/users/${userId}/habits/`);
-  cachedHabits = habits || [];
-  document.getElementById("habitsMount").innerHTML = habitsTableHtml(cachedHabits);
+  currentHabits = habits || [];
+  document.getElementById("habitsMount").innerHTML = habitsTableHtml(currentHabits);
 }
 
 async function initHabits() {

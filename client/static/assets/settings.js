@@ -1,4 +1,4 @@
-/* Settings page logic: profile update + full account delete. */
+/* Settings page logic: profile update and account deletion. */
 
 async function loadProfile(userId) {
   const { data: user } = await HabitHub.apiRequest(`/users/${userId}/`);
