@@ -1,14 +1,36 @@
 /*
- * Dashboard: stats cards, habits table, chart, quick logging.
- * Most from AI. summarizeTracking has my bug fixes. renderChart filters to active only.
- * initDashboard removed caching, optimized with Promise.all() for active habits.
+ * Dashboard page logic: stats, table, chart, and quick logging.
+ *
+ * Code origin:
+ * - Most render and UI functions: AI (Copilot GPT-5.4)
+ * - summarizeTracking(): AI (Copilot GPT-5.4) with self made fixes:
+ *   - Fixed done_today bug: now correctly compares todayKey with uniqueDays set
+ *   - Improved date aggregation logic for accurate 7-day and 30-day counts
+ * - renderChart(): AI (Copilot GPT-5.4) with USER ADDITION: filter to show only active habits
+ * - initDashboard(): AI (Copilot GPT-5.4) with USER OPTIMIZATIONS:
+ *   - Removed sessionStorage dashboard caching (data now fetches fresh each load)
+ *   - Optimized to fetch tracking logs only for active habits using Promise.all()
+ *   - Greatly improved performance on dashboard load
  */
 
 let habitChartInstance = null;
 
 /**
- * Parse tracking logs and calc metrics: done_today, days7, days30, streak.
- * Fixed the done_today bug and improved date math.
+ * AI (user-fixed): Calculate dashboard tracking metrics from habit tracking logs.
+ *
+ * Input parameters:
+ * - logs: Array of tracking log resources from API.
+ *
+ * Output:
+ * - Returns object with done_today, days7, days30 and streak.
+ *
+ * USER MODIFICATIONS:
+ * - Fixed done_today status: now correctly checks if today's date is in uniqueDays set
+ * - Improved date aggregation: accurate calculation of dates in 7-day and 30-day windows
+ * - Robust timestamp parsing: skips invalid dates without breaking dashboard
+ *
+ * Exceptions / failure handling:
+ * - Invalid timestamp values are ignored so dashboard does not fail.
  */
 function summarizeTracking(logs) {
   const toLocalDayKey = (dateObj) => {
@@ -157,7 +179,17 @@ async function loadQuote() {
 }
 
 /**
- * Render chart for active habits only.
+ * USER-ADDED OPTIMIZATION: Render dashboard chart with only active habits.
+ *
+ * Input parameters:
+ * - habits: Array of enriched habit objects.
+ *
+ * USER ADDITION: Filters to include only active habits to avoid clutter from inactive ones
+ * and provide focused habit tracking visualization.
+ *
+ * Exceptions / failure handling:
+ * - This code expects Chart.js is already loaded in page.
+ * - Old chart instance is destroyed before new render.
  */
 function renderChart(habits) {
   const activeHabits = habits.filter((habit) => habit.active);
@@ -268,8 +300,19 @@ async function logHabit(userId, habitId) {
 }
 
 /**
- * Load dashboard. Fetch only active habits, parallel requests with Promise.all().
- * No caching - always fresh. Much faster.
+ * AI-SCAFFOLD (user-optimized): Initialize dashboard page and load all visible dashboard content.
+ *
+ * USER OPTIMIZATIONS:
+ * - Active-only tracking fetches: Only fetch tracking logs for active habits (not all habits)
+ *   to reduce API calls and improve performance
+ * - Promise.all() batching: Fetch all active habit tracking logs in parallel rather than
+ *   sequentially, significantly speeding up dashboard load time
+ * - Removed caching: Eliminated sessionStorage dashboard caching so fresh data loads each time
+ * - Metric calculation: Builds complete enriched habit data with metrics for display
+ *
+ * Exceptions / failure handling:
+ * - Protected page check uses HabitHub.requireUser and redirects if needed.
+ * - Dashboard load failures are caught and shown as flash message.
  */
 async function initDashboard() {
   const user = HabitHub.requireUser();

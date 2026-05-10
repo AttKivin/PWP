@@ -2,21 +2,20 @@
  * Settings and account management code for static HabitHub client.
  *
  * Code origin:
- * - loadProfile(): AI scaffold (Copilot GPT-5.4).
+ * - loadProfile(): USER-WRITTEN. Simple API request to load user profile by id.
  * - deleteAccountTree(): AI scaffold structure, USER IMPLEMENTED the correct cascading
  *   delete order based on HabitHub data model: reminders → tracking logs → habits → user.
  *   This order ensures foreign key constraints are satisfied during deletion.
  * - initSettings(): AI scaffold with user adaptations for form wiring and session state updates.
  *
- * Prompt reference: "Create client-side settings page logic for profile updates and account
+ * Prompt: "Create client-side settings page logic for profile updates and account
  * deletion in a static frontend that talks to a REST API."
  *
- * Note: REST and resource-handling patterns from course material are foundational;
- * user adaptations focus on HabitHub-specific data model requirements.
+ * REST and resource-handling patterns from course material
  */
 
 /**
- * AI-SCAFFOLD: Load current user profile from API.
+ * USER-WRITTEN: Load current user profile from API.
  *
  * Input parameters:
  * - userId: Id of current logged user.
@@ -39,12 +38,13 @@ async function loadProfile(userId) {
  * - userId: Id of current logged user.
  *
  * USER IMPLEMENTATION:
- * Correct cascading delete order based on HabitHub data model constraints:
+ * Correct cascading delete because of Habithub bug where deleting user does not cascade 
+ * to habits, and deleting habits does not cascade to reminders and tracking logs. 
+ * The correct order is:
  * 1. Delete all reminders for each habit (references habit)
  * 2. Delete all tracking logs for each habit (references habit)
  * 3. Delete all habits (references user)
  * 4. Delete user account
- * This order ensures foreign key constraints are satisfied at each deletion step.
  *
  * Exceptions / failure handling:
  * - API request errors are passed if some delete step fails.
@@ -79,7 +79,7 @@ async function deleteAccountTree(userId) {
 }
 
 /**
- * AI-SCAFFOLD (adapted): Initialize settings page and connect profile/account actions.
+ * ChatGPT 5.4 (adapted): Initialize settings page and connect profile/account actions.
  *
  * Implementation:
  * - Loads current user profile into form fields

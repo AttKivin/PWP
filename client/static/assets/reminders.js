@@ -1,10 +1,21 @@
 /*
- * Reminders page for selected habit.
- * getHabitIdFromQuery: me. Rest from AI, I wired the event handlers.
+ * Reminder management page code for static HabitHub client.
+ *
+ * Code origin:
+ * - getHabitIdFromQuery(): USER-WRITTEN. Simple utility for reading habitId from query string.
+ * - All other functions: AI (Copilot GPT-5.4) with user adaptations.
+ * - User adaptations: CRUD event handlers wired manually, time field handling,
+ *   API endpoints and messages tailored to HabitHub model.
+ *
+ * Prompt reference: "Build client-side reminder management for a static frontend, including
+ * loading habit id from query string and create, edit, delete reminder actions."
  */
 
 /**
- * Get habitId from query string.
+ * USER-WRITTEN: Read habit id from page query string.
+ *
+ * Output:
+ * - Returns habitId from query as string, or null if missing
  */
 function getHabitIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
@@ -12,7 +23,16 @@ function getHabitIdFromQuery() {
 }
 
 /**
- * Build reminders table HTML with time inputs and edit forms.
+ * AI (adapted): Build reminder table HTML for selected habit.
+ *
+ * Input parameters:
+ * - reminders: Array of reminder resources from API.
+ * - habitId: Selected habit id from page query.
+ *
+ * Output:
+ * - Returns HTML string for reminder table or empty message.
+ *
+ * User adaptation: Time field handling and styling adapted to HabitHub model.
  */
 function renderReminderTable(reminders, habitId) {
   if (!reminders.length) {
@@ -50,7 +70,14 @@ function renderReminderTable(reminders, habitId) {
 }
 
 /**
- * Fetch reminders for habit and re-render the table.
+ * AI (adapted): Refresh reminders for selected habit and render table again.
+ *
+ * Input parameters:
+ * - userId: Id of current logged user.
+ * - habitId: Id of selected habit.
+ *
+ * Exceptions / failure handling:
+ * - API request errors are passed to caller so flash message can be shown.
  */
 async function refreshReminders(userId, habitId) {
   const { data: reminders } = await HabitHub.apiRequest(`/users/${userId}/habits/${habitId}/reminders/`);
@@ -58,7 +85,21 @@ async function refreshReminders(userId, habitId) {
 }
 
 /**
- * Load reminders page for selected habit. Validate habitId, wire CRUD handlers.
+ * AI (adapted): Initialize reminders page and register CRUD handlers.
+ *
+ * Implementation:
+ * - Validates habitId query parameter exists
+ * - Fetches and displays selected habit name
+ * - Wires form submissions for create and update
+ * - Wires delete button with confirmation
+ * - Initial reminder list load
+ *
+ * User adaptations: Time field validation, event handler wiring, HabitHub API endpoint routing.
+ *
+ * Exceptions / failure handling:
+ * - Login protection is done by HabitHub.requireUser.
+ * - Missing query parameter and API failures are shown by flash message and
+ *   function returns early.
  */
 async function initReminders() {
   const user = HabitHub.requireUser();

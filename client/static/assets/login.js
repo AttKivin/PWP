@@ -1,12 +1,34 @@
 /*
- * Login and signup.
- * signInByEmail: me. createAccount: AI, tweaked for Location header.
- * initLoginPage: AI with form wiring.
+ * Login and account creation code for static HabitHub client.
+ *
+ * Code origin:
+ * - signInByEmail(): USER-WRITTEN. Implements email lookup and user matching logic
+ *   with email normalization (trim, lowercase) for case-insensitive comparison.
+ * - createAccount(): AI (Copilot GPT-5.4) with user adaptation to handle
+ *   Location header follow-up and fallback to email-based sign-in.
+ * - initLoginPage(): AI (Copilot GPT-5.4) with user adaptations for form wiring and API error display.
+ *
+ * Prompt reference: "Create client-side login and registration logic for a static frontend
+ * that works with a REST API, stores the logged user locally, and redirects after success."
  */
 
 /**
- * Find user by email (case-insensitive), sign them in.
+ * USER-WRITTEN: Sign in user by matching given email against user collection.
+ *
+ * Implementation:
+ * - Fetches complete user collection from /users/ endpoint
+ * - Normalizes input email (trim, lowercase) for case-insensitive comparison
+ * - Finds matching user by normalized email
+ * - Sets user session and redirects to dashboard
+ *
+ * Input parameters:
+ * - email: Email value from sign-in form.
+ *
+ * Exceptions / failure handling:
+ * - Throws Error if matching account is not found.
+ * - Can pass API request errors from HabitHub.apiRequest.
  */
+
 async function signInByEmail(email) {
   const { data: users } = await HabitHub.apiRequest("/users/");
   const normalized = email.trim().toLowerCase();
@@ -19,8 +41,24 @@ async function signInByEmail(email) {
 }
 
 /**
- * Create account. Follow Location header to get user, fallback to email sign-in.
+ * AI (adapted by user): Create new user account with HabitHub API.
+ *
+ * Implementation:
+ * - Posts new user payload to /users/ endpoint
+ * - User adaptation: Follows Location header from POST response to fetch created user
+ * - Extracts /users/{id}/ path from Location header and fetches user object
+ * - Fallback: If Location follow-up fails, signs in by email instead
+ * - Sets user session and redirects to dashboard
+ *
+ * Input parameters:
+ * - payload: Object with first_name, last_name and email.
+ *
+ * Exceptions / failure handling:
+ * - Can pass API request errors from create request or follow-up fetch.
+ * - If Location follow-up does not give user object, code tries sign in by
+ *   email as fallback.
  */
+
 async function createAccount(payload) {
   const { location } = await HabitHub.apiRequest("/users/", {
     method: "POST",
@@ -46,8 +84,18 @@ async function createAccount(payload) {
 }
 
 /**
- * Wire up login and signup forms. Redirect if already logged in.
+ * AI (adapted by user): Add event handlers for sign-in and account creation forms.
+ *
+ * Implementation:
+ * - Wires form submit events to call signInByEmail or createAccount
+ * - User adaptations: Form error handling, flash message display
+ * - Checks for existing session and redirects to dashboard if already logged in
+ *
+ * Exceptions / failure handling:
+ * - If user already exists in local storage, page goes to dashboard.
+ * - Form submit errors are caught and shown as flash message.
  */
+
 function initLoginPage() {
   if (HabitHub.getCurrentUser()) {
     window.location.href = "/dashboard.html";

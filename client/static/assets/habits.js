@@ -1,12 +1,33 @@
 /*
- * Habits CRUD page.
- * All from AI scaffold. I wired the event handlers and integrated reminder links.
+ * Habit management page code for static HabitHub client.
+ *
+ * Code origin:
+ * - All functions: AI (Copilot GPT-5.4) with user manual work.
+ * - User adaptations: Field names and API endpoints mapped to HabitHub model,
+ *   CRUD event handlers wired manually, reminder links integrated.
+ *
+ * Prompt reference: "Build client-side CRUD page logic for habits in a static web frontend,
+ * including table rendering, create form, update form, and delete actions. Make sure to
+ * adapt API requests and field names to match HabitHub API."
  */
 
 let cachedHabits = [];
 
 /**
- * Build habits table HTML with reminder links and inline edit forms.
+ * AI (adapted): Build HTML table text from current habit collection.
+ *
+ * Input parameters:
+ * - habits: Array of habit resources from API.
+ *
+ * Output:
+ * - Returns HTML string for table or empty message.
+ *
+ * User adaptation: Reminder links wired to reminders.html with habitId query parameter,
+ * field names and styling adapted to HabitHub model.
+ *
+ * Exceptions / failure handling:
+ * - This function should not fail in normal use. It expects habit fields same
+ *   like HabitHub API returns.
  */
 function habitsTableHtml(habits) {
   if (!habits.length) {
@@ -52,7 +73,13 @@ function habitsTableHtml(habits) {
 }
 
 /**
- * Fetch habits and re-render the table.
+ * AI (adapted): Refresh habit list from API and render table again.
+ *
+ * Input parameters:
+ * - userId: Id of current logged user.
+ *
+ * Exceptions / failure handling:
+ * - API request errors are passed to caller so message can be shown.
  */
 async function refreshHabits(userId) {
   const { data: habits } = await HabitHub.apiRequest(`/users/${userId}/habits/`);
@@ -61,7 +88,14 @@ async function refreshHabits(userId) {
 }
 
 /**
- * Load habits page and wire up all create/update/delete event handlers.
+ * AI (adapted): Initialize habits page and connect all CRUD event handlers.
+ *
+ * User adaptations: All form submit and click event handlers wired manually to wire
+ * create, update, delete operations with proper form validation and API endpoint routing.
+ *
+ * Exceptions / failure handling:
+ * - Protected page check uses HabitHub.requireUser and redirects if needed.
+ * - API failures are caught in handlers and shown as flash message.
  */
 async function initHabits() {
   const user = HabitHub.requireUser();
